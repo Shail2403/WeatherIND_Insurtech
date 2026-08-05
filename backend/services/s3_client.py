@@ -1,22 +1,18 @@
-import os
 import boto3
 from botocore.client import Config
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
+from core.config import settings
 
 # Initialize the S3 client
 s3_client = boto3.client(
     's3',
-    endpoint_url=os.getenv('SUPABASE_S3_ENDPOINT'),
-    aws_access_key_id=os.getenv('SUPABASE_S3_ACCESS_KEY'),
-    aws_secret_access_key=os.getenv('SUPABASE_S3_SECRET_KEY'),
-    region_name=os.getenv('SUPABASE_S3_REGION'),
+    endpoint_url=settings.SUPABASE_S3_ENDPOINT,
+    aws_access_key_id=settings.SUPABASE_S3_ACCESS_KEY,
+    aws_secret_access_key=settings.SUPABASE_S3_SECRET_KEY,
+    region_name=settings.SUPABASE_S3_REGION,
     config=Config(signature_version='s3v4')
 )
 
-BUCKET_NAME = os.getenv('SUPABASE_BUCKET_NAME')
+BUCKET_NAME = settings.SUPABASE_BUCKET_NAME
 
 def test_s3_connection():
     """

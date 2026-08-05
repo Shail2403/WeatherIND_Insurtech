@@ -1,7 +1,7 @@
 *.pdf
 case_study.txt
 resume.txt
-Wenv/
+.venv/
 __pycache__/
 *.pyc
 .env
