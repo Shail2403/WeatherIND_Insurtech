@@ -5,3 +5,4 @@ Wenv/
 __pycache__/
 *.pyc
 .env
+case_study_breakdown.md
