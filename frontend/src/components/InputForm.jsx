@@ -95,7 +95,7 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
     return () => clearTimeout(timeoutId);
   }, [formData.latitude, formData.longitude]);
 
-  useEffect(() => {
+  const requestGeolocation = () => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -109,11 +109,16 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
         (err) => {
           console.warn("Geolocation denied or error:", err);
           setGeoError(true);
-        }
+        },
+        { timeout: 5000 }
       );
     } else {
       setGeoError(true);
     }
+  };
+
+  useEffect(() => {
+    requestGeolocation();
   }, []);
 
   // Date Modifier State
@@ -183,11 +188,20 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {geoError && (
-        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-300 p-3 rounded-lg text-sm flex items-start gap-2 animate-fade-in mb-4">
-          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-          <p>
-            <strong>Location access denied.</strong> Please click anywhere on the map or manually search by entering coordinates to see visualizations.
-          </p>
+        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-300 p-3 rounded-lg text-sm flex flex-col items-start gap-2 animate-fade-in mb-4">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <p>
+              <strong>Location access denied.</strong> Your browser blocked location access. Click the "Lock" icon in your URL bar to allow it, or click the map manually.
+            </p>
+          </div>
+          <button 
+            type="button"
+            onClick={requestGeolocation}
+            className="ml-7 bg-orange-200 hover:bg-orange-300 dark:bg-orange-800 dark:hover:bg-orange-700 text-orange-900 dark:text-orange-100 px-3 py-1.5 rounded text-xs font-bold transition-colors shadow-sm"
+          >
+            Retry Location
+          </button>
         </div>
       )}
 

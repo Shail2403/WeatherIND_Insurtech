@@ -16,10 +16,11 @@
 }
 
 .ambient-glow-bg {
-  background: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.07) 0px, transparent 55%),
-              radial-gradient(at 100% 0%, rgba(249, 115, 22, 0.06) 0px, transparent 50%),
-              radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 55%),
-              #f8fafc;
+  /* Bright, cheerful weather-like gradient for light mode */
+  background: radial-gradient(circle at 10% 10%, rgba(254, 240, 138, 0.6) 0%, transparent 40%),
+              radial-gradient(circle at 90% 90%, rgba(186, 230, 253, 0.7) 0%, transparent 50%),
+              radial-gradient(circle at 50% 50%, rgba(224, 242, 254, 0.5) 0%, transparent 60%),
+              #f0f9ff;
   transition: background 0.4s, background-color 0.4s;
 }
 .dark .ambient-glow-bg {
@@ -30,17 +31,50 @@
 }
 
 .glass-panel {
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 32px 0 rgba(14, 165, 233, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
   transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
 }
 .dark .glass-panel {
   background: rgba(15, 23, 42, 0.82);
   border: 1px solid rgba(51, 65, 85, 0.65);
   box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* Weather Animations */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes drift {
+  0% { transform: translateX(-15vw); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { transform: translateX(110vw); opacity: 0; }
+}
+
+@keyframes pulse-sun {
+  0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+  50% { transform: scale(1.1) rotate(15deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+.animate-drift-slow {
+  animation: drift 80s linear infinite;
+}
+.animate-drift-fast {
+  animation: drift 45s linear infinite;
+}
+.animate-sun {
+  animation: pulse-sun 12s ease-in-out infinite;
 }
 
 /* Custom Scrollbar for a premium feel */

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Sun, Moon } from 'lucide-react'
+import { Sun, Moon, Cloud } from 'lucide-react'
 import InputForm from './components/InputForm'
 import FileBrowser from './components/FileBrowser'
 import DataVisualization from './components/DataVisualization'
@@ -36,9 +36,27 @@ function App() {
   }, [isDarkMode]);
 
   return (
-    <div className="min-h-screen ambient-glow-bg p-8 transition-colors duration-300">
-      {/* Header Section */}
-      <header className="max-w-6xl mx-auto mb-8 border-b border-gray-300 dark:border-climate-card pb-4 flex justify-between items-end">
+    <div className="min-h-screen ambient-glow-bg p-8 transition-colors duration-300 relative overflow-hidden">
+      
+      {/* Decorative Weather Background Elements */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-20 dark:opacity-[0.03]">
+        <div className="absolute top-10 left-[10%] animate-sun text-yellow-500">
+          <Sun size={120} />
+        </div>
+        <div className="absolute top-24 -left-32 animate-drift-slow text-gray-400">
+          <Cloud size={80} />
+        </div>
+        <div className="absolute top-48 -left-32 animate-drift-fast text-gray-300" style={{ animationDelay: '12s' }}>
+          <Cloud size={60} />
+        </div>
+        <div className="absolute bottom-32 -left-32 animate-drift-slow text-gray-400" style={{ animationDelay: '25s' }}>
+          <Cloud size={100} />
+        </div>
+      </div>
+
+      <div className="relative z-10">
+        {/* Header Section */}
+        <header className="max-w-6xl mx-auto mb-8 border-b border-gray-300 dark:border-climate-card pb-4 flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-bold text-climate-accent">
             InRisk Climate Dashboard
@@ -100,7 +118,8 @@ function App() {
 
         </div>
 
-      </main>
+        </main>
+      </div>
     </div>
   )
 }
