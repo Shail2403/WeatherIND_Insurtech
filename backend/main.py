@@ -12,10 +12,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for the frontend React app
+# CORS configuration for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # For production, restrict this to the frontend URL
+    allow_origins=["*"],  # TODO: Restrict in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,12 +36,9 @@ def health_s3():
 @app.post("/store-weather-data")
 async def store_weather_data(request: WeatherRequest):
     """
-    1. Validates the request via the WeatherRequest schema.
-    2. Fetches data from Open-Meteo (Archive or Forecast dynamically).
-    3. Saves the raw JSON to the S3 bucket.
+    Fetches historical data from Open-Meteo and stores raw JSON in S3.
     """
     try:
-        # Fetch from Open-Meteo
         weather_data = await fetch_historical_weather(
             lat=request.latitude,
             lon=request.longitude,
@@ -49,18 +46,16 @@ async def store_weather_data(request: WeatherRequest):
             end_date=request.end_date
         )
 
-        # Generate a unique filename as required by the case study
+        # Enforce case study file naming convention
         timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
         file_name = f"weather_{request.latitude}_{request.longitude}_{request.start_date}_{request.end_date}_{timestamp}.json"
 
-        # Upload to S3
         upload_json_to_s3(file_name, weather_data)
 
         return {"status": "ok", "file": file_name}
     
     except Exception as e:
-        # If anything goes wrong, return a 500 Server Error
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Server Error: {repr(e)}")
 
 @app.get("/list-weather-files")
 def list_weather_files():
@@ -69,7 +64,6 @@ def list_weather_files():
         response = s3_client.list_objects_v2(Bucket=BUCKET_NAME)
         files = []
         
-        # Check if the bucket has any contents
         if 'Contents' in response:
             for obj in response['Contents']:
                 files.append({
@@ -84,17 +78,14 @@ def list_weather_files():
 
 @app.get("/weather-file-content/{file}")
 def get_weather_file_content(file: str):
-    """Fetches the contents of a specific JSON file from the bucket."""
+    """Retrieves specific weather JSON file from S3 bucket."""
     try:
         response = s3_client.get_object(Bucket=BUCKET_NAME, Key=file)
-        # The body is a stream, so we read it and decode it from bytes to string
+         # info.data contains previously validated fields (like start_date)
         file_content = response['Body'].read().decode('utf-8')
-        
-        # Convert the string back into a JSON object to return
         return json.loads(file_content)
     
     except s3_client.exceptions.NoSuchKey:
-        # If the file doesn't exist, return a 404 (as required by case study)
         raise HTTPException(status_code=404, detail="not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

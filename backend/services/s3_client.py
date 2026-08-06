@@ -51,6 +51,42 @@ def upload_json_to_s3(file_name: str, json_data: dict) -> str:
         print(f"❌ Failed to upload to S3: {e}")
         raise e
 
+def list_s3_files() -> list:
+    """
+    Lists all JSON files in the S3 bucket.
+    """
+    try:
+        response = s3_client.list_objects_v2(Bucket=BUCKET_NAME)
+        # S3 returns objects under the 'Contents' key. If bucket is empty, it might not exist.
+        objects = response.get('Contents', [])
+        
+        files = []
+        for obj in objects:
+            # We format the response exactly how the Case Study requested
+            files.append({
+                "name": obj['Key'],
+                "size": obj['Size'],
+                "created_at": obj['LastModified'].isoformat()
+            })
+        return files
+    except Exception as e:
+        print(f"❌ Failed to list S3 files: {e}")
+        raise e
+
+def read_s3_file(file_name: str) -> dict:
+    """
+    Reads the content of a specific file from the bucket and returns the parsed JSON.
+    """
+    try:
+        response = s3_client.get_object(Bucket=BUCKET_NAME, Key=file_name)
+        # The 'Body' is a stream, so we must read() it, then decode it, then parse it with json.loads
+        file_content = response['Body'].read().decode('utf-8')
+        return json.loads(file_content)
+    except Exception as e:
+        # If the file doesn't exist, AWS/Supabase raises a NoSuchKey error
+        print(f"❌ Failed to read {file_name} from S3: {e}")
+        raise e
+
 # When running this file directly, it will test the connection
 if __name__ == "__main__":
     test_s3_connection()

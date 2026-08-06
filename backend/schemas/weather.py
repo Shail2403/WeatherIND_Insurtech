@@ -10,7 +10,7 @@ class WeatherRequest(BaseModel):
     @field_validator('end_date')
     @classmethod
     def validate_dates(cls, end_date: str, info):
-        # info.data contains previously validated fields (like start_date)
+                # info.data contains previously validated fields (like start_date)
         start_date = info.data.get('start_date')
         if not start_date:
             return end_date
@@ -25,9 +25,6 @@ class WeatherRequest(BaseModel):
         if delta > 31:
             raise ValueError("Date range cannot exceed 31 days")
             
-        # The user's advanced check: Ensure they aren't asking for a forecast 
-        # further out than Open-Meteo allows (14 days max for free tier).
-        # We handle this loosely, but let's prevent crazy future dates.
         today = datetime.utcnow().date()
         if (end - today).days > 14:
             raise ValueError("Forecasts are only available up to 14 days in the future")
