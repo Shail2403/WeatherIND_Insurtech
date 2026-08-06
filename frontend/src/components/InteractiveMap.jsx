@@ -71,11 +71,11 @@ const InteractiveMap = ({ lat, lon, onLocationSelect, locationHistory = [], trac
   };
 
   const wrapperClasses = isMaximized 
-    ? "fixed inset-0 z-[200] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-12 animate-fade-in"
+    ? "fixed inset-0 z-[200] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 animate-fade-in"
     : "";
 
   const mapClasses = isMaximized
-    ? "w-full h-full max-h-[85vh] rounded-2xl overflow-hidden shadow-2xl relative"
+    ? "w-full max-w-7xl h-[80vh] rounded-2xl overflow-hidden shadow-2xl relative"
     : "w-full h-72 rounded-xl overflow-hidden shadow-inner border border-gray-300 dark:border-gray-700 mb-6 relative z-0";
 
   return (
@@ -161,6 +161,19 @@ const InteractiveMap = ({ lat, lon, onLocationSelect, locationHistory = [], trac
             </Tooltip>
           </Marker>
         )}
+
+        {/* Map Legend */}
+        <div className="absolute bottom-6 right-4 z-[1000] bg-white/90 dark:bg-gray-800/90 p-2.5 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-3 h-3 rounded-full bg-blue-500 border-2 border-white shadow-sm"></div>
+            <span className="text-gray-800 dark:text-gray-200">Current Target</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-orange-500 border-2 border-white shadow-sm"></div>
+            <span className="text-gray-800 dark:text-gray-200">History Location</span>
+          </div>
+        </div>
+
         <MapUpdater lat={lat} lon={lon} />
         <MapResizer isMaximized={isMaximized} />
       </MapContainer>

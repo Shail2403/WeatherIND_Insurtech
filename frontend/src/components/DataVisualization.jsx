@@ -264,12 +264,12 @@ export default function DataVisualization({ selectedFile }) {
 
       {/* Chart */}
       <div 
-        className={isMaximized ? "fixed inset-0 z-[200] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 sm:p-12 animate-fade-in" : ""}
+        className={isMaximized ? "fixed inset-0 z-[200] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 animate-fade-in" : ""}
         onClick={() => isMaximized && setIsMaximized(false)}
       >
         <div 
           ref={chartRef} 
-          className={isMaximized ? "w-full max-w-7xl bg-white dark:bg-climate-dark p-6 rounded-2xl shadow-2xl relative flex flex-col h-[85vh]" : "glass-panel p-4 rounded-lg pt-6 relative"}
+          className={isMaximized ? "w-full max-w-7xl bg-white dark:bg-climate-dark p-4 sm:p-6 rounded-2xl shadow-2xl relative flex flex-col h-[80vh]" : "glass-panel p-4 rounded-lg pt-6 relative"}
           onClick={(e) => isMaximized && e.stopPropagation()}
         >
           
@@ -322,12 +322,19 @@ export default function DataVisualization({ selectedFile }) {
             <ResponsiveContainer width="100%" height="100%">
             {chartType === 'line' ? (
               <LineChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#9ca3af" vertical={false} opacity={0.3} />
-                <XAxis dataKey="time" stroke="#9CA3AF" fontSize={12} tickMargin={10} minTickGap={30} />
-                <YAxis stroke="#9CA3AF" fontSize={12} domain={['auto', 'auto']} tickFormatter={(value) => `${value}°`} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" vertical={false} opacity={0.2} />
+                <XAxis dataKey="time" stroke="#6b7280" fontSize={12} tickMargin={10} minTickGap={30} />
+                <YAxis stroke="#6b7280" fontSize={12} domain={['auto', 'auto']} tickFormatter={(value) => `${value}°`} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'var(--tw-colors-gray-900)', borderColor: '#374151', color: '#f8fafc', borderRadius: '0.5rem' }}
-                  itemStyle={{ color: '#0ea5e9' }}
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                    borderColor: '#e5e7eb', 
+                    color: '#1f2937', 
+                    borderRadius: '0.5rem',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                  itemStyle={{ color: '#0ea5e9', fontWeight: 'bold' }}
+                  labelStyle={{ color: '#4b5563', fontWeight: 'bold', marginBottom: '4px' }}
                 />
                 <ReferenceLine y={35} label={{ position: 'top', value: 'High Risk (>35°C)', fill: '#ef4444', fontSize: 12 }} stroke="#ef4444" strokeDasharray="3 3" />
                 <ReferenceLine y={0} label={{ position: 'bottom', value: 'Freeze Risk (<0°C)', fill: '#3b82f6', fontSize: 12 }} stroke="#3b82f6" strokeDasharray="3 3" />
@@ -347,12 +354,19 @@ export default function DataVisualization({ selectedFile }) {
                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#9ca3af" vertical={false} opacity={0.3} />
-                <XAxis dataKey="time" stroke="#9CA3AF" fontSize={12} tickMargin={10} minTickGap={30} />
-                <YAxis stroke="#9CA3AF" fontSize={12} domain={['auto', 'auto']} tickFormatter={(value) => `${value}°`} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" vertical={false} opacity={0.2} />
+                <XAxis dataKey="time" stroke="#6b7280" fontSize={12} tickMargin={10} minTickGap={30} />
+                <YAxis stroke="#6b7280" fontSize={12} domain={['auto', 'auto']} tickFormatter={(value) => `${value}°`} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'var(--tw-colors-gray-900)', borderColor: '#374151', color: '#f8fafc', borderRadius: '0.5rem' }}
-                  itemStyle={{ color: '#0ea5e9' }}
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                    borderColor: '#e5e7eb', 
+                    color: '#1f2937', 
+                    borderRadius: '0.5rem',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                  itemStyle={{ color: '#0ea5e9', fontWeight: 'bold' }}
+                  labelStyle={{ color: '#4b5563', fontWeight: 'bold', marginBottom: '4px' }}
                 />
                 <ReferenceLine y={35} stroke="#ef4444" strokeDasharray="3 3" />
                 <ReferenceLine y={0} stroke="#3b82f6" strokeDasharray="3 3" />
