@@ -1,5 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, CircleMarker, Tooltip, useMapEvents, useMap } from 'react-leaflet';
+import { Maximize2, Minimize2, Download } from 'lucide-react';
+import * as htmlToImage from 'html-to-image';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -35,15 +37,73 @@ const MapUpdater = ({ lat, lon }) => {
   return null;
 };
 
+// Component to handle map resizing when maximizing
+const MapResizer = ({ isMaximized }) => {
+  const map = useMap();
+  useEffect(() => {
+    // Delay slightly to let the CSS transition finish before invalidating size
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [isMaximized, map]);
+  return null;
+};
+
 const InteractiveMap = ({ lat, lon, onLocationSelect, locationHistory = [], trackHistory = true, onToggleHistory }) => {
   const defaultCenter = [51.505, -0.09]; // Default to London
   const center = lat && lon ? [lat, lon] : defaultCenter;
+  const [isMaximized, setIsMaximized] = useState(false);
+  const mapContainerRef = useRef(null);
+
+  const handleDownload = async () => {
+    if (!mapContainerRef.current) return;
+    try {
+      const dataUrl = await htmlToImage.toPng(mapContainerRef.current, { backgroundColor: '#ffffff' });
+      const link = document.createElement('a');
+      link.download = 'map_snapshot.png';
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Failed to download map', err);
+      alert('Failed to download map screenshot. Browsers sometimes block external map tiles for security.');
+    }
+  };
+
+  const wrapperClasses = isMaximized 
+    ? "fixed inset-0 z-[200] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-12 animate-fade-in"
+    : "";
+
+  const mapClasses = isMaximized
+    ? "w-full h-full max-h-[85vh] rounded-2xl overflow-hidden shadow-2xl relative"
+    : "w-full h-72 rounded-xl overflow-hidden shadow-inner border border-gray-300 dark:border-gray-700 mb-6 relative z-0";
 
   return (
-    <div className="w-full h-72 rounded-xl overflow-hidden shadow-inner border border-gray-300 dark:border-gray-700 mb-6 relative z-0">
-      
-      {/* Absolute Toggle Button */}
-      <div className="absolute top-3 right-3 z-[1000]">
+    <div className={wrapperClasses}>
+      <div ref={mapContainerRef} className={mapClasses}>
+        
+        {/* Left Floating Action Buttons */}
+        <div className="absolute top-3 left-3 z-[1000] flex flex-col gap-2">
+          <button 
+            type="button"
+            onClick={() => setIsMaximized(!isMaximized)}
+            className="p-2 rounded-lg bg-white/90 dark:bg-gray-800/90 text-gray-800 dark:text-gray-200 shadow-lg border border-gray-300 dark:border-gray-600 hover:bg-white hover:scale-105 transition-all backdrop-blur-md"
+            title={isMaximized ? "Minimize Map" : "Maximize Map"}
+          >
+            {isMaximized ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+          </button>
+          <button 
+            type="button"
+            onClick={handleDownload}
+            className="p-2 rounded-lg bg-white/90 dark:bg-gray-800/90 text-gray-800 dark:text-gray-200 shadow-lg border border-gray-300 dark:border-gray-600 hover:bg-white hover:scale-105 transition-all backdrop-blur-md"
+            title="Download Map Snapshot"
+          >
+            <Download size={18} />
+          </button>
+        </div>
+
+        {/* Absolute Toggle Button */}
+        <div className="absolute top-3 right-3 z-[1000]">
         <button 
           type="button"
           onClick={onToggleHistory}
@@ -93,7 +153,9 @@ const InteractiveMap = ({ lat, lon, onLocationSelect, locationHistory = [], trac
           </Marker>
         )}
         <MapUpdater lat={lat} lon={lon} />
+        <MapResizer isMaximized={isMaximized} />
       </MapContainer>
+      </div>
     </div>
   );
 };

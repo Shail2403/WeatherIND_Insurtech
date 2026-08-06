@@ -4,16 +4,36 @@ import {
 } from 'recharts';
 import { 
   Loader2, TrendingUp, Thermometer, AlertTriangle, LineChart as LineChartIcon, AreaChart as AreaChartIcon,
-  MapPin, Calendar, CloudRain, Wind, ThermometerSun, Snowflake, CheckCircle2, Cloud
+  MapPin, Calendar, CloudRain, Wind, ThermometerSun, Snowflake, CheckCircle2, Cloud,
+  Maximize2, Minimize2, Download
 } from 'lucide-react';
+import { useRef } from 'react';
+import * as htmlToImage from 'html-to-image';
 
 export default function DataVisualization({ selectedFile }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [chartType, setChartType] = useState('line'); // 'line' or 'area'
+  const [isMaximized, setIsMaximized] = useState(false);
+  const chartRef = useRef(null);
 
   const [headerLocation, setHeaderLocation] = useState('Locating...');
+
+  const handleDownload = async () => {
+    if (!chartRef.current) return;
+    try {
+      // Set background color to properly render charts with transparent backgrounds
+      const dataUrl = await htmlToImage.toPng(chartRef.current, { backgroundColor: '#ffffff' });
+      const link = document.createElement('a');
+      link.download = `weather_chart_${headerLocation.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Failed to download chart', err);
+      alert('Failed to download chart snapshot.');
+    }
+  };
   
   // Reverse Geocoding for Header based on file name
   useEffect(() => {
@@ -243,34 +263,56 @@ export default function DataVisualization({ selectedFile }) {
       </div>
 
       {/* Chart */}
-      <div className="glass-panel p-4 rounded-lg pt-6">
-        <div className="flex items-center justify-between mb-6 px-2">
-          <div className="flex items-center gap-2">
-            <Thermometer size={20} className="text-climate-accent" />
-            <h3 className="font-medium text-gray-800 dark:text-gray-200">Temperature Time Series</h3>
+      <div className={isMaximized ? "fixed inset-0 z-[200] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 sm:p-12 animate-fade-in" : ""}>
+        <div ref={chartRef} className={isMaximized ? "w-full max-w-7xl bg-white dark:bg-climate-dark p-6 rounded-2xl shadow-2xl relative flex flex-col h-[85vh]" : "glass-panel p-4 rounded-lg pt-6 relative"}>
+          
+          {/* Action Buttons */}
+          <div className="absolute top-4 right-4 z-[100] flex gap-2">
+            <button 
+              type="button"
+              onClick={handleDownload}
+              className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-white hover:text-climate-accent transition-colors border border-gray-200 dark:border-gray-700"
+              title="Download Chart Snapshot"
+            >
+              <Download size={16} />
+            </button>
+            <button 
+              type="button"
+              onClick={() => setIsMaximized(!isMaximized)}
+              className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-white hover:text-climate-accent transition-colors border border-gray-200 dark:border-gray-700"
+              title={isMaximized ? "Minimize Chart" : "Maximize Chart"}
+            >
+              {isMaximized ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between mb-4 px-2 pr-24">
+            <div className="flex items-center gap-2">
+              <Thermometer size={20} className="text-climate-accent" />
+              <h3 className="font-bold text-gray-800 dark:text-gray-200">{isMaximized ? `${headerLocation} - Temperature Time Series` : 'Temperature Time Series'}</h3>
+            </div>
+            
+            {/* Chart Toggle */}
+            <div className="flex bg-gray-200 dark:bg-climate-dark border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
+              <button
+                onClick={() => setChartType('line')}
+                className={`p-1.5 transition-colors ${chartType === 'line' ? 'bg-climate-accent text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
+                title="Line Chart"
+              >
+                <LineChartIcon size={16} />
+              </button>
+              <button
+                onClick={() => setChartType('area')}
+                className={`p-1.5 transition-colors ${chartType === 'area' ? 'bg-climate-accent text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
+                title="Area Chart"
+              >
+                <AreaChartIcon size={16} />
+              </button>
+            </div>
           </div>
           
-          {/* Chart Toggle */}
-          <div className="flex bg-gray-200 dark:bg-climate-dark border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
-            <button
-              onClick={() => setChartType('line')}
-              className={`p-1.5 transition-colors ${chartType === 'line' ? 'bg-climate-accent text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
-              title="Line Chart"
-            >
-              <LineChartIcon size={16} />
-            </button>
-            <button
-              onClick={() => setChartType('area')}
-              className={`p-1.5 transition-colors ${chartType === 'area' ? 'bg-climate-accent text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
-              title="Area Chart"
-            >
-              <AreaChartIcon size={16} />
-            </button>
-          </div>
-        </div>
-        
-        <div className="h-72 w-full">
-          <ResponsiveContainer width="100%" height="100%">
+          <div className={isMaximized ? "flex-1 w-full mt-4" : "h-72 w-full"}>
+            <ResponsiveContainer width="100%" height="100%">
             {chartType === 'line' ? (
               <LineChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#9ca3af" vertical={false} opacity={0.3} />
