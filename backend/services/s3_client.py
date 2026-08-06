@@ -1,3 +1,4 @@
+import json
 import boto3
 from botocore.client import Config
 from core.config import settings
@@ -27,6 +28,28 @@ def test_s3_connection():
     except Exception as e:
         print(f"❌ Failed to connect to S3: {e}")
         return False
+
+def upload_json_to_s3(file_name: str, json_data: dict) -> str:
+    """
+    Uploads a python dictionary as a JSON string to the S3 bucket.
+    Returns the file name on success.
+    """
+    try:
+        # Convert the python dictionary to a JSON formatted string
+        json_string = json.dumps(json_data)
+        
+        # put_object uploads the data directly without saving a temporary file on the server disk
+        s3_client.put_object(
+            Bucket=BUCKET_NAME,
+            Key=file_name,
+            Body=json_string,
+            ContentType='application/json'
+        )
+        print(f"✅ Successfully uploaded {file_name} to {BUCKET_NAME}")
+        return file_name
+    except Exception as e:
+        print(f"❌ Failed to upload to S3: {e}")
+        raise e
 
 # When running this file directly, it will test the connection
 if __name__ == "__main__":
