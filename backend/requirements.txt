@@ -3,3 +3,6 @@ uvicorn
 boto3
 httpx
 pydantic-settings
+pytest
+pytest-asyncio
+pytest-httpx
