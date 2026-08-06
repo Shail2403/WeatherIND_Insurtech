@@ -343,9 +343,9 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
               onChange={(e) => setModifierTarget(e.target.value)}
               className="w-full bg-white dark:bg-climate-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 text-sm rounded-lg py-2 px-2 focus:outline-none focus:border-climate-accent shadow-sm"
             >
-              <option value="start">📅 Start Date</option>
-              <option value="end">📅 End Date</option>
-              <option value="both">📅 Both Dates</option>
+              <option value="start">▶️ Start Date</option>
+              <option value="end">⏹️ End Date</option>
+              <option value="both">🔀 Both Dates</option>
             </select>
           </div>
         </div>
@@ -396,23 +396,29 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="date"
-            name="start_date"
-            value={formData.start_date}
-            onChange={handleChange}
-            required
-            className="w-full bg-gray-50 dark:bg-climate-dark border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-gray-900 dark:text-white focus:outline-none focus:border-climate-accent transition-colors"
-          />
-          <input
-            type="date"
-            name="end_date"
-            value={formData.end_date}
-            onChange={handleChange}
-            required
-            className="w-full bg-gray-50 dark:bg-climate-dark border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-gray-900 dark:text-white focus:outline-none focus:border-climate-accent transition-colors"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Start Date</label>
+            <input
+              type="date"
+              name="start_date"
+              value={formData.start_date}
+              onChange={handleChange}
+              required
+              className="w-full bg-gray-50 dark:bg-climate-dark border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-gray-900 dark:text-white focus:outline-none focus:border-climate-accent transition-colors shadow-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">End Date</label>
+            <input
+              type="date"
+              name="end_date"
+              value={formData.end_date}
+              onChange={handleChange}
+              required
+              className="w-full bg-gray-50 dark:bg-climate-dark border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-gray-900 dark:text-white focus:outline-none focus:border-climate-accent transition-colors shadow-sm"
+            />
+          </div>
         </div>
       </div>
 
