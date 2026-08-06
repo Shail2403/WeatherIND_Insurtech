@@ -356,6 +356,7 @@ export default function DataVisualization({ selectedFile }) {
             )}
           </ResponsiveContainer>
         </div>
+        </div>
       </div>
     </div>
   );
