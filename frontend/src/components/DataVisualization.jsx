@@ -4,7 +4,7 @@ import {
 } from 'recharts';
 import { 
   Loader2, TrendingUp, Thermometer, AlertTriangle, LineChart as LineChartIcon, AreaChart as AreaChartIcon,
-  MapPin, Calendar, CloudRain, Wind, ThermometerSun, ThermometerSnow, CheckCircle2, Cloud
+  MapPin, Calendar, CloudRain, Wind, ThermometerSun, Snowflake, CheckCircle2, Cloud
 } from 'lucide-react';
 
 export default function DataVisualization({ selectedFile }) {
@@ -184,7 +184,7 @@ export default function DataVisualization({ selectedFile }) {
         {/* Card 2 */}
         <div className="glass-panel p-5 rounded-xl border border-gray-200 dark:border-gray-700/60 bg-gradient-to-br from-white to-blue-50/50 dark:from-climate-dark dark:to-blue-900/10">
           <div className="flex items-center gap-2 mb-2">
-            <ThermometerSnow size={16} className="text-blue-500" />
+            <Snowflake size={16} className="text-blue-500" />
             <p className="text-gray-600 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Average Low</p>
           </div>
           <p className="text-3xl font-black text-gray-900 dark:text-white mb-1">{avgLow} <span className="text-lg text-gray-500 font-medium">°C</span></p>
