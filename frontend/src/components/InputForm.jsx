@@ -147,15 +147,32 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
   const [modifierAmount, setModifierAmount] = useState(1);
   const modifierOptions = [1, 2, 3, 5, 10, 15, 30, 31];
 
-  const applyModifier = () => {
+  const getModifierValidity = () => {
+    if (!formData.start_date || !formData.end_date) return false;
     const amount = parseInt(modifierAmount, 10);
-    let newFormData = { ...formData };
+    const s = new Date(formData.start_date);
+    const e = new Date(formData.end_date);
+    
+    if (modifierTarget === 'start' || modifierTarget === 'both') {
+      s.setDate(modifierAction === 'add' ? s.getDate() - amount : s.getDate() + amount);
+    }
+    if (modifierTarget === 'end' || modifierTarget === 'both') {
+      e.setDate(modifierAction === 'add' ? e.getDate() + amount : e.getDate() - amount);
+    }
+    return s > e; // Invalid if start goes beyond end
+  };
+
+  const isModifierInvalid = getModifierValidity();
+
+  const applyModifier = () => {
+    if (isModifierInvalid) return;
+    
+    const amount = parseInt(modifierAmount, 10);
+    const newFormData = { ...formData };
 
     if (modifierTarget === 'start' || modifierTarget === 'both') {
       if (newFormData.start_date) {
         const start = new Date(newFormData.start_date);
-        // To ADD days to the range at the start, we move the start date BACKWARD
-        // To REMOVE days from the range at the start, we move the start date FORWARD
         start.setDate(modifierAction === 'add' ? start.getDate() - amount : start.getDate() + amount);
         newFormData.start_date = start.toISOString().split('T')[0];
       }
@@ -164,8 +181,6 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
     if (modifierTarget === 'end' || modifierTarget === 'both') {
       if (newFormData.end_date) {
         const end = new Date(newFormData.end_date);
-        // To ADD days to the range at the end, we move the end date FORWARD
-        // To REMOVE days from the range at the end, we move the end date BACKWARD
         end.setDate(modifierAction === 'add' ? end.getDate() + amount : end.getDate() - amount);
         newFormData.end_date = end.toISOString().split('T')[0];
       }
@@ -350,12 +365,25 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
           </div>
         </div>
         
-        {/* Apply Button */}
-        <div className="mt-3 flex justify-end">
+        {/* Apply Button & Validation Warning */}
+        <div className="mt-3 flex flex-col sm:flex-row items-end sm:items-center justify-between gap-2">
+          <div className="flex-1">
+            {isModifierInvalid && (
+              <div className="flex items-center gap-1.5 text-red-500 dark:text-red-400 text-xs font-bold animate-pulse">
+                <AlertCircle size={14} /> 
+                <span>⚠️ Diff Error: No. of Days to Remove is greater than the Date Difference!</span>
+              </div>
+            )}
+          </div>
           <button 
             type="button" 
             onClick={applyModifier}
-            className="bg-climate-accent hover:bg-blue-600 text-white text-sm font-medium py-1.5 px-4 rounded-lg shadow-sm transition-colors"
+            disabled={isModifierInvalid}
+            className={`text-sm font-medium py-1.5 px-4 rounded-lg shadow-sm transition-colors ${
+              isModifierInvalid 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400' 
+                : 'bg-climate-accent hover:bg-blue-600 text-white'
+            }`}
           >
             Apply Modification
           </button>
