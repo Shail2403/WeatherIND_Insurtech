@@ -26,7 +26,7 @@ async def fetch_historical_weather(lat: float, lon: float, start_date: str, end_
         "longitude": lon,
         "start_date": start_date,
         "end_date": end_date,
-        "daily": "temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min",
+        "daily": "temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_sum,wind_speed_10m_max",
         "timezone": "auto"
     }
 
