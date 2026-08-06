@@ -9,6 +9,20 @@ function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [externalLocationTarget, setExternalLocationTarget] = useState(null);
   
+  // Sync Map Location when a file is selected
+  useEffect(() => {
+    if (selectedFile) {
+      const parts = selectedFile.split('_');
+      if (parts.length >= 3) {
+        const lat = parseFloat(parts[1]);
+        const lon = parseFloat(parts[2]);
+        if (!isNaN(lat) && !isNaN(lon)) {
+          setExternalLocationTarget({ lat, lon });
+        }
+      }
+    }
+  }, [selectedFile]);
+  
   // Theme state: defaults to true (dark mode)
   const [isDarkMode, setIsDarkMode] = useState(true);
 

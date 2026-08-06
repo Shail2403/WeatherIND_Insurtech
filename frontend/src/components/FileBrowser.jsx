@@ -60,26 +60,24 @@ export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFet
       activeFiles = activeFiles.filter(file => new Date(file.created_at) >= cutoff);
     }
 
-    // Location Filter
+    // Location/Keyword Filter
     if (searchQuery.trim().length > 0) {
-      if (searchedCoordinates) {
-        const searchLat = searchedCoordinates.lat;
-        const searchLon = searchedCoordinates.lon;
+      activeFiles = activeFiles.filter(file => {
+        // 1. Direct Keyword Match in Filename
+        if (file.name.toLowerCase().includes(searchQuery.toLowerCase())) return true;
         
-        activeFiles = activeFiles.filter(file => {
+        // 2. Geocoded Coordinate Match
+        if (searchedCoordinates && searchedCoordinates.lat !== 999) {
           const parts = file.name.split('_');
           if (parts.length >= 3) {
             const fileLat = parseFloat(parts[1]);
             const fileLon = parseFloat(parts[2]);
-            // 0.05 degrees is roughly 5km tolerance
-            return Math.abs(fileLat - searchLat) < 0.05 && Math.abs(fileLon - searchLon) < 0.05;
+            return Math.abs(fileLat - searchedCoordinates.lat) < 0.05 && 
+                   Math.abs(fileLon - searchedCoordinates.lon) < 0.05;
           }
-          return false;
-        });
-      } else {
-        // Fallback to exact text match while geocoding
-        activeFiles = activeFiles.filter(file => file.name.includes(searchQuery));
-      }
+        }
+        return false;
+      });
     }
 
     setFilteredFiles(activeFiles);
