@@ -13,6 +13,7 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [geoError, setGeoError] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const [locationName, setLocationName] = useState('Locating...');
   const [isGeocoding, setIsGeocoding] = useState(false);
 
@@ -97,21 +98,29 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
 
   const requestGeolocation = () => {
     if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setFormData(prev => ({
-            ...prev,
-            latitude: position.coords.latitude.toFixed(4),
-            longitude: position.coords.longitude.toFixed(4)
-          }));
-          setGeoError(false);
-        },
-        (err) => {
-          console.warn("Geolocation denied or error:", err);
-          setGeoError(true);
-        },
-        { timeout: 5000 }
-      );
+      setIsLocating(true);
+      setGeoError(false);
+      
+      // Artificial delay to provide visual feedback before the browser instantly rejects it
+      setTimeout(() => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setFormData(prev => ({
+              ...prev,
+              latitude: position.coords.latitude.toFixed(4),
+              longitude: position.coords.longitude.toFixed(4)
+            }));
+            setGeoError(false);
+            setIsLocating(false);
+          },
+          (err) => {
+            console.warn("Geolocation denied or error:", err);
+            setGeoError(true);
+            setIsLocating(false);
+          },
+          { timeout: 5000 }
+        );
+      }, 500);
     } else {
       setGeoError(true);
     }
@@ -187,7 +196,15 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {geoError && (
+      {/* Geolocation Retry / Error Banner */}
+      {isLocating && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 p-3 rounded-lg text-sm flex items-center gap-2 animate-pulse mb-4">
+          <Loader2 className="w-5 h-5 animate-spin shrink-0" />
+          <p>Requesting location permission from browser...</p>
+        </div>
+      )}
+
+      {geoError && !isLocating && (
         <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-300 p-3 rounded-lg text-sm flex flex-col items-start gap-2 animate-fade-in mb-4">
           <div className="flex items-start gap-2">
             <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
