@@ -36,8 +36,15 @@ function App() {
   }, [isDarkMode]);
 
   // Smooth scroll logic for dynamic navigation
-  const [canScrollUp, setCanScrollUp] = useState(false);
-  const [canScrollDown, setCanScrollDown] = useState(true);
+  const [prevSectionName, setPrevSectionName] = useState(null);
+  const [nextSectionName, setNextSectionName] = useState(null);
+
+  const sectionNames = {
+    'section-fetch': 'Fetch Data',
+    'section-storage': 'Storage',
+    'section-analysis': 'Analysis'
+  };
+  const sections = ['section-fetch', 'section-storage', 'section-analysis'];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,18 +52,42 @@ function App() {
       const innerHeight = window.innerHeight;
       const scrollHeight = document.documentElement.scrollHeight;
 
-      setCanScrollUp(scrollY > 5);
-      setCanScrollDown(Math.ceil(scrollY + innerHeight) < scrollHeight - 5);
+      const atTop = scrollY <= 5;
+      const atBottom = Math.ceil(scrollY + innerHeight) >= scrollHeight - 5;
+
+      const yPositionsMap = new Map();
+      sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && !yPositionsMap.has(el.offsetTop)) {
+          yPositionsMap.set(el.offsetTop, id);
+        }
+      });
+      const yPositions = Array.from(yPositionsMap.keys()).sort((a, b) => a - b);
+
+      if (atTop) {
+        setPrevSectionName(null);
+      } else {
+        const prevY = [...yPositions].reverse().find(y => y < scrollY - 50);
+        setPrevSectionName(prevY !== undefined ? sectionNames[yPositionsMap.get(prevY)] : 'Top');
+      }
+
+      if (atBottom) {
+        setNextSectionName(null);
+      } else {
+        const nextY = yPositions.find(y => y > scrollY + 50);
+        setNextSectionName(nextY !== undefined ? sectionNames[yPositionsMap.get(nextY)] : 'Bottom');
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     // Run once on mount and after a short delay to account for rendering
     handleScroll();
-    setTimeout(handleScroll, 500);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const timeout = setTimeout(handleScroll, 500);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeout);
+    };
   }, [refreshTrigger, selectedFile]); // Re-evaluate when content size changes
-
-  const sections = ['section-fetch', 'section-storage', 'section-analysis'];
 
   const handleScrollUp = () => {
     // Extract unique Y positions to handle side-by-side desktop grid cleanly
@@ -95,12 +126,12 @@ function App() {
     <div className="min-h-screen ambient-glow-bg p-8 transition-colors duration-300 relative overflow-hidden">
       
       {/* Floating Scroll Navigation */}
-      <div className="fixed inset-y-0 left-2 md:left-6 flex items-center z-[100] pointer-events-none">
+      <div className="fixed inset-y-0 left-2 md:left-6 flex flex-col items-center justify-center z-[100] pointer-events-none">
         <button 
           onClick={handleScrollUp}
-          disabled={!canScrollUp}
+          disabled={!prevSectionName}
           className={`pointer-events-auto p-3 rounded-full border-2 transition-all active:translate-y-0 active:shadow-[0px_0px_0px_0px_#facc15] ${
-            canScrollUp 
+            prevSectionName 
               ? 'bg-gray-900 dark:bg-black border-gray-700 text-yellow-400 shadow-[4px_4px_0px_0px_#facc15] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_#fef08a]' 
               : 'bg-gray-800 border-gray-700 text-gray-500 opacity-50 cursor-not-allowed shadow-none'
           }`}
@@ -108,14 +139,24 @@ function App() {
         >
           <ChevronUp size={24} className="stroke-[3]" />
         </button>
+        {prevSectionName && (
+          <span className="mt-3 text-[10px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300 bg-white/90 dark:bg-gray-800/90 px-3 py-1.5 rounded-full shadow-sm backdrop-blur border border-gray-200 dark:border-gray-700 pointer-events-auto transition-all animate-fade-in">
+            {prevSectionName}
+          </span>
+        )}
       </div>
 
-      <div className="fixed inset-y-0 right-2 md:right-6 flex items-center z-[100] pointer-events-none">
+      <div className="fixed inset-y-0 right-2 md:right-6 flex flex-col items-center justify-center z-[100] pointer-events-none">
+        {nextSectionName && (
+          <span className="mb-3 text-[10px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300 bg-white/90 dark:bg-gray-800/90 px-3 py-1.5 rounded-full shadow-sm backdrop-blur border border-gray-200 dark:border-gray-700 pointer-events-auto transition-all animate-fade-in">
+            {nextSectionName}
+          </span>
+        )}
         <button 
           onClick={handleScrollDown}
-          disabled={!canScrollDown}
+          disabled={!nextSectionName}
           className={`pointer-events-auto p-3 rounded-full border-2 transition-all active:translate-y-0 active:shadow-[0px_0px_0px_0px_#facc15] ${
-            canScrollDown 
+            nextSectionName 
               ? 'bg-gray-900 dark:bg-black border-gray-700 text-yellow-400 shadow-[4px_4px_0px_0px_#facc15] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_#fef08a]' 
               : 'bg-gray-800 border-gray-700 text-gray-500 opacity-50 cursor-not-allowed shadow-none'
           }`}
@@ -193,7 +234,12 @@ function App() {
             <div id="section-storage" className="glass-panel p-6 rounded-xl scroll-mt-24">
               <FileBrowser 
                 refreshTrigger={refreshTrigger} 
-                onSelectFile={(file) => setSelectedFile(file)} 
+                onSelectFile={(file) => {
+                  setSelectedFile(file);
+                  setTimeout(() => {
+                    document.getElementById('section-analysis')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }, 100);
+                }} 
                 onRequestFetch={(lat, lon, name) => setExternalLocationTarget({ lat, lon, name })}
               />
             </div>
