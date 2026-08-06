@@ -263,26 +263,33 @@ export default function DataVisualization({ selectedFile }) {
       </div>
 
       {/* Chart */}
-      <div className={isMaximized ? "fixed inset-0 z-[200] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 sm:p-12 animate-fade-in" : ""}>
-        <div ref={chartRef} className={isMaximized ? "w-full max-w-7xl bg-white dark:bg-climate-dark p-6 rounded-2xl shadow-2xl relative flex flex-col h-[85vh]" : "glass-panel p-4 rounded-lg pt-6 relative"}>
+      <div 
+        className={isMaximized ? "fixed inset-0 z-[200] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 sm:p-12 animate-fade-in" : ""}
+        onClick={() => isMaximized && setIsMaximized(false)}
+      >
+        <div 
+          ref={chartRef} 
+          className={isMaximized ? "w-full max-w-7xl bg-white dark:bg-climate-dark p-6 rounded-2xl shadow-2xl relative flex flex-col h-[85vh]" : "glass-panel p-4 rounded-lg pt-6 relative"}
+          onClick={(e) => isMaximized && e.stopPropagation()}
+        >
           
           {/* Action Buttons */}
           <div className="absolute top-4 right-4 z-[100] flex gap-2">
             <button 
               type="button"
               onClick={handleDownload}
-              className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-white hover:text-climate-accent transition-colors border border-gray-200 dark:border-gray-700"
+              className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-600 hover:text-white transition-all shadow-sm border border-emerald-200 dark:border-emerald-800"
               title="Download Chart Snapshot"
             >
-              <Download size={16} />
+              <Download size={18} />
             </button>
             <button 
               type="button"
               onClick={() => setIsMaximized(!isMaximized)}
-              className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-white hover:text-climate-accent transition-colors border border-gray-200 dark:border-gray-700"
+              className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-blue-200 dark:border-blue-800"
               title={isMaximized ? "Minimize Chart" : "Maximize Chart"}
             >
-              {isMaximized ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              {isMaximized ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
             </button>
           </div>
 

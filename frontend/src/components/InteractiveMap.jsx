@@ -79,26 +79,35 @@ const InteractiveMap = ({ lat, lon, onLocationSelect, locationHistory = [], trac
     : "w-full h-72 rounded-xl overflow-hidden shadow-inner border border-gray-300 dark:border-gray-700 mb-6 relative z-0";
 
   return (
-    <div className={wrapperClasses}>
-      <div ref={mapContainerRef} className={mapClasses}>
+    <div 
+      className={wrapperClasses}
+      onClick={() => isMaximized && setIsMaximized(false)}
+    >
+      <div 
+        ref={mapContainerRef} 
+        className={mapClasses}
+        onClick={(e) => isMaximized && e.stopPropagation()}
+      >
         
-        {/* Left Floating Action Buttons */}
-        <div className="absolute top-3 left-3 z-[1000] flex flex-col gap-2">
+        {/* Floating Action Buttons (Moved to Bottom Left to avoid Leaflet Zoom controls) */}
+        <div className="absolute bottom-6 left-4 z-[1000] flex flex-row gap-3">
           <button 
             type="button"
             onClick={() => setIsMaximized(!isMaximized)}
-            className="p-2 rounded-lg bg-white/90 dark:bg-gray-800/90 text-gray-800 dark:text-gray-200 shadow-lg border border-gray-300 dark:border-gray-600 hover:bg-white hover:scale-105 transition-all backdrop-blur-md"
+            className="px-3 py-2 flex items-center gap-2 rounded-xl bg-blue-600 text-white shadow-[0_4px_12px_rgba(37,99,235,0.5)] border border-blue-500 hover:bg-blue-500 hover:-translate-y-1 hover:scale-105 transition-all backdrop-blur-md font-bold text-sm"
             title={isMaximized ? "Minimize Map" : "Maximize Map"}
           >
             {isMaximized ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+            <span className="hidden sm:inline">{isMaximized ? "Minimize" : "Maximize"}</span>
           </button>
           <button 
             type="button"
             onClick={handleDownload}
-            className="p-2 rounded-lg bg-white/90 dark:bg-gray-800/90 text-gray-800 dark:text-gray-200 shadow-lg border border-gray-300 dark:border-gray-600 hover:bg-white hover:scale-105 transition-all backdrop-blur-md"
+            className="px-3 py-2 flex items-center gap-2 rounded-xl bg-emerald-600 text-white shadow-[0_4px_12px_rgba(5,150,105,0.5)] border border-emerald-500 hover:bg-emerald-500 hover:-translate-y-1 hover:scale-105 transition-all backdrop-blur-md font-bold text-sm"
             title="Download Map Snapshot"
           >
             <Download size={18} />
+            <span className="hidden sm:inline">Snapshot</span>
           </button>
         </div>
 
