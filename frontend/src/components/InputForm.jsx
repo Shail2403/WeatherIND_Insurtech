@@ -13,6 +13,48 @@ export default function InputForm({ onUploadSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [geoError, setGeoError] = useState(false);
+  const [locationName, setLocationName] = useState('Locating...');
+  const [isGeocoding, setIsGeocoding] = useState(false);
+
+  // Reverse Geocoding Effect with Debounce
+  useEffect(() => {
+    const lat = parseFloat(formData.latitude);
+    const lon = parseFloat(formData.longitude);
+    
+    if (isNaN(lat) || isNaN(lon)) return;
+
+    setIsGeocoding(true);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`, {
+          headers: { 'Accept-Language': 'en-US,en;q=0.9' }
+        });
+        const data = await response.json();
+        
+        if (data && data.display_name) {
+          const addr = data.address || {};
+          const area = addr.city || addr.town || addr.village || addr.suburb || addr.county || '';
+          const state = addr.state || '';
+          const country = addr.country || '';
+          const postcode = addr.postcode || '';
+          
+          let cleanName = [area, state, country].filter(Boolean).join(', ');
+          if (postcode) cleanName += ` - ${postcode}`;
+          
+          setLocationName(cleanName || data.display_name);
+        } else {
+          setLocationName('Unknown Location');
+        }
+      } catch (err) {
+        console.error("Geocoding error:", err);
+        setLocationName('Unknown Location');
+      } finally {
+        setIsGeocoding(false);
+      }
+    }, 800);
+
+    return () => clearTimeout(timeoutId);
+  }, [formData.latitude, formData.longitude]);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -109,6 +151,14 @@ export default function InputForm({ onUploadSuccess }) {
           </p>
         </div>
       )}
+
+      {/* Location Banner */}
+      <div className="bg-climate-accent/10 border border-climate-accent/30 text-climate-accent p-3 rounded-lg flex items-center gap-2 mb-4">
+        {isGeocoding ? <Loader2 className="w-5 h-5 animate-spin" /> : <MapPin className="w-5 h-5" />}
+        <span className="text-sm font-medium">
+          You are viewing for: {isGeocoding ? 'Locating...' : (locationName || 'Unknown Location')}
+        </span>
+      </div>
 
       {/* Interactive Map */}
       <div>

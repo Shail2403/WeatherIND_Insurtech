@@ -44,10 +44,10 @@ function App() {
       </header>
 
       {/* Main Dashboard Grid */}
-      <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Left Column: Input Form & File Browser */}
-        <div className="lg:col-span-1 space-y-8">
+        {/* Left Column: Input Form */}
+        <div className="lg:col-span-4 space-y-8">
           
           {/* Input Form */}
           <div className="glass-panel p-6 rounded-xl">
@@ -62,18 +62,18 @@ function App() {
               }} 
             />
           </div>
+        </div>
 
-          {/* File Browser */}
+        {/* Right Column: Visualization & File Browser */}
+        <div className="lg:col-span-8 space-y-8">
+          
+          {/* File Browser moved to top of right column */}
           <div className="glass-panel p-6 rounded-xl">
             <FileBrowser 
               refreshTrigger={refreshTrigger} 
               onSelectFile={(file) => setSelectedFile(file)} 
             />
           </div>
-        </div>
-
-        {/* Right Column: Visualization */}
-        <div className="lg:col-span-2 space-y-8">
           
           <div className="glass-panel p-6 rounded-xl">
             <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-white">Climate Data Analysis</h2>
