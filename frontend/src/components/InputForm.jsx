@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { CloudRain, MapPin, Calendar, Loader2, Plus, Minus, Settings2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CloudRain, MapPin, Calendar, Loader2, Plus, Minus, Settings2, AlertCircle } from 'lucide-react';
+import InteractiveMap from './InteractiveMap';
 
 export default function InputForm({ onUploadSuccess }) {
   const [formData, setFormData] = useState({
@@ -11,6 +12,28 @@ export default function InputForm({ onUploadSuccess }) {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [geoError, setGeoError] = useState(false);
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFormData(prev => ({
+            ...prev,
+            latitude: position.coords.latitude.toFixed(4),
+            longitude: position.coords.longitude.toFixed(4)
+          }));
+          setGeoError(false);
+        },
+        (err) => {
+          console.warn("Geolocation denied or error:", err);
+          setGeoError(true);
+        }
+      );
+    } else {
+      setGeoError(true);
+    }
+  }, []);
 
   // Date Modifier State
   const [modifierAction, setModifierAction] = useState('add'); // 'add' or 'subtract'
@@ -78,6 +101,34 @@ export default function InputForm({ onUploadSuccess }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {geoError && (
+        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-300 p-3 rounded-lg text-sm flex items-start gap-2 animate-fade-in mb-4">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <p>
+            <strong>Location access denied.</strong> Please click anywhere on the map or manually search by entering coordinates to see visualizations.
+          </p>
+        </div>
+      )}
+
+      {/* Interactive Map */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+          <MapPin size={16} className="text-climate-accent" />
+          Select Location on Map
+        </label>
+        <InteractiveMap 
+          lat={formData.latitude ? parseFloat(formData.latitude) : null}
+          lon={formData.longitude ? parseFloat(formData.longitude) : null}
+          onLocationSelect={(lat, lon) => {
+            setFormData(prev => ({
+              ...prev,
+              latitude: lat.toFixed(4),
+              longitude: lon.toFixed(4)
+            }));
+          }}
+        />
+      </div>
+
       {/* Coordinates */}
       <div className="grid grid-cols-2 gap-4">
         <div>
