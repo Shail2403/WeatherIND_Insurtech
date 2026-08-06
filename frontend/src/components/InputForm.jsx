@@ -19,23 +19,26 @@ export default function InputForm({ onUploadSuccess }) {
   const modifierOptions = [1, 2, 3, 5, 10, 15, 30, 31];
 
   const applyModifier = () => {
-    const targetDateStr = modifierTarget === 'start' ? formData.start_date : formData.end_date;
-    if (!targetDateStr) return;
-    
-    const date = new Date(targetDateStr);
     const amount = parseInt(modifierAmount, 10);
-    
-    if (modifierAction === 'add') {
-      date.setDate(date.getDate() + amount);
-    } else {
-      date.setDate(date.getDate() - amount);
+    let newFormData = { ...formData };
+
+    if (modifierTarget === 'start' || modifierTarget === 'both') {
+      if (newFormData.start_date) {
+        const start = new Date(newFormData.start_date);
+        start.setDate(modifierAction === 'add' ? start.getDate() + amount : start.getDate() - amount);
+        newFormData.start_date = start.toISOString().split('T')[0];
+      }
     }
-    
-    const newDateStr = date.toISOString().split('T')[0];
-    setFormData({
-      ...formData,
-      [modifierTarget === 'start' ? 'start_date' : 'end_date']: newDateStr
-    });
+
+    if (modifierTarget === 'end' || modifierTarget === 'both') {
+      if (newFormData.end_date) {
+        const end = new Date(newFormData.end_date);
+        end.setDate(modifierAction === 'add' ? end.getDate() + amount : end.getDate() - amount);
+        newFormData.end_date = end.toISOString().split('T')[0];
+      }
+    }
+
+    setFormData(newFormData);
   };
 
   const handleChange = (e) => {
@@ -108,61 +111,64 @@ export default function InputForm({ onUploadSuccess }) {
       </div>
 
       {/* Date Modifier Tool */}
-      <div className="bg-gray-100 dark:bg-climate-dark/50 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-        <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase flex items-center gap-1">
-          <Settings2 size={12} /> Date Modifier
+      <div className="bg-gray-100 dark:bg-climate-dark/30 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+        <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3 uppercase flex items-center gap-1">
+          <Settings2 size={12} /> Advanced Date Modifier
         </label>
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-          {/* Action */}
-          <div className="flex bg-gray-200 dark:bg-climate-dark border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setModifierAction('add')}
-              className={`px-3 py-1.5 flex items-center gap-1 text-sm ${modifierAction === 'add' ? 'bg-climate-accent text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
-              title="Add Days"
+        
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+          
+          {/* Action Dropdown */}
+          <div className="sm:col-span-4">
+            <select
+              value={modifierAction}
+              onChange={(e) => setModifierAction(e.target.value)}
+              className="w-full bg-white dark:bg-climate-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 text-sm rounded-lg py-2 px-2 focus:outline-none focus:border-climate-accent shadow-sm"
             >
-              <Plus size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setModifierAction('subtract')}
-              className={`px-3 py-1.5 flex items-center gap-1 text-sm ${modifierAction === 'subtract' ? 'bg-red-500 text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
-              title="Subtract Days"
-            >
-              <Minus size={14} />
-            </button>
+              <option value="add">➕ Add number of days</option>
+              <option value="subtract">➖ Remove number of days</option>
+            </select>
           </div>
 
-          {/* Amount */}
-          <select 
-            value={modifierAmount} 
-            onChange={(e) => setModifierAmount(e.target.value)}
-            className="bg-white dark:bg-climate-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 text-sm rounded-lg py-1.5 px-2 focus:outline-none focus:border-climate-accent"
-          >
-            {modifierOptions.map(num => (
-              <option key={num} value={num}>{num} {num === 1 ? 'Day' : 'Days'}</option>
-            ))}
-          </select>
+          {/* Amount Dropdown */}
+          <div className="sm:col-span-3">
+            <select 
+              value={modifierAmount} 
+              onChange={(e) => setModifierAmount(e.target.value)}
+              className="w-full bg-white dark:bg-climate-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 text-sm rounded-lg py-2 px-2 focus:outline-none focus:border-climate-accent shadow-sm"
+            >
+              {modifierOptions.map(num => (
+                <option key={num} value={num}>{num} {num === 1 ? 'Day' : 'Days'}</option>
+              ))}
+            </select>
+          </div>
 
-          <span className="text-gray-500 text-sm">to</span>
+          <div className="hidden sm:block text-center text-gray-500 text-sm sm:col-span-1">
+            to
+          </div>
 
-          {/* Target */}
-          <select 
-            value={modifierTarget} 
-            onChange={(e) => setModifierTarget(e.target.value)}
-            className="bg-white dark:bg-climate-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 text-sm rounded-lg py-1.5 px-2 focus:outline-none focus:border-climate-accent"
-          >
-            <option value="start">Start Date</option>
-            <option value="end">End Date</option>
-          </select>
-
-          {/* Apply */}
+          {/* Target Dropdown */}
+          <div className="sm:col-span-4">
+            <select 
+              value={modifierTarget} 
+              onChange={(e) => setModifierTarget(e.target.value)}
+              className="w-full bg-white dark:bg-climate-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 text-sm rounded-lg py-2 px-2 focus:outline-none focus:border-climate-accent shadow-sm"
+            >
+              <option value="start">📅 Start Date</option>
+              <option value="end">📅 End Date</option>
+              <option value="both">📅 Both Dates</option>
+            </select>
+          </div>
+        </div>
+        
+        {/* Apply Button */}
+        <div className="mt-3 flex justify-end">
           <button 
             type="button" 
             onClick={applyModifier}
-            className="ml-auto bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-sm font-medium py-1.5 px-3 rounded-lg transition-colors"
+            className="bg-climate-accent hover:bg-blue-600 text-white text-sm font-medium py-1.5 px-4 rounded-lg shadow-sm transition-colors"
           >
-            Apply
+            Apply Modification
           </button>
         </div>
       </div>

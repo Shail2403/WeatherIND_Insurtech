@@ -92,19 +92,19 @@ export default function DataVisualization({ selectedFile }) {
       
       {/* Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-climate-dark/50 border border-gray-200 dark:border-gray-700 p-4 rounded-lg shadow-sm">
+        <div className="glass-panel p-4 rounded-lg">
           <p className="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">Max Temp</p>
           <p className="text-2xl font-bold text-red-500 dark:text-red-400">{maxTemp}°C</p>
         </div>
-        <div className="bg-white dark:bg-climate-dark/50 border border-gray-200 dark:border-gray-700 p-4 rounded-lg shadow-sm">
+        <div className="glass-panel p-4 rounded-lg">
           <p className="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">Min Temp</p>
           <p className="text-2xl font-bold text-blue-500 dark:text-blue-400">{minTemp}°C</p>
         </div>
-        <div className="bg-white dark:bg-climate-dark/50 border border-gray-200 dark:border-gray-700 p-4 rounded-lg shadow-sm">
+        <div className="glass-panel p-4 rounded-lg">
           <p className="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">Avg Temp</p>
           <p className="text-2xl font-bold text-gray-800 dark:text-gray-200">{avgTemp}°C</p>
         </div>
-        <div className="bg-white dark:bg-climate-dark/50 border border-gray-200 dark:border-gray-700 p-4 rounded-lg shadow-sm">
+        <div className="glass-panel p-4 rounded-lg">
           <p className="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wider mb-1 flex items-center gap-1">
             <AlertTriangle size={12} className="text-orange-500 dark:text-orange-400" /> Extreme Days
           </p>
@@ -113,7 +113,7 @@ export default function DataVisualization({ selectedFile }) {
       </div>
 
       {/* Chart */}
-      <div className="bg-gray-50 dark:bg-climate-dark/30 border border-gray-200 dark:border-gray-700 p-4 rounded-lg pt-6">
+      <div className="glass-panel p-4 rounded-lg pt-6">
         <div className="flex items-center justify-between mb-6 px-2">
           <div className="flex items-center gap-2">
             <Thermometer size={20} className="text-climate-accent" />

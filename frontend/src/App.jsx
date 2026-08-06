@@ -21,7 +21,7 @@ function App() {
   }, [isDarkMode]);
 
   return (
-    <div className="min-h-screen p-8 transition-colors duration-300">
+    <div className="min-h-screen ambient-glow-bg p-8 transition-colors duration-300">
       {/* Header Section */}
       <header className="max-w-6xl mx-auto mb-8 border-b border-gray-300 dark:border-climate-card pb-4 flex justify-between items-end">
         <div>
@@ -50,7 +50,7 @@ function App() {
         <div className="lg:col-span-1 space-y-8">
           
           {/* Input Form */}
-          <div className="bg-white dark:bg-climate-card p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 transition-colors">
+          <div className="glass-panel p-6 rounded-xl">
             <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Fetch Data</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Enter coordinates and date range to fetch from Open-Meteo and store in S3.
@@ -64,19 +64,18 @@ function App() {
           </div>
 
           {/* File Browser */}
-          <div className="bg-white dark:bg-climate-card p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 transition-colors">
+          <div className="glass-panel p-6 rounded-xl">
             <FileBrowser 
               refreshTrigger={refreshTrigger} 
               onSelectFile={(file) => setSelectedFile(file)} 
             />
           </div>
-
         </div>
 
         {/* Right Column: Visualization */}
         <div className="lg:col-span-2 space-y-8">
           
-          <div className="bg-white dark:bg-climate-card p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 transition-colors">
+          <div className="glass-panel p-6 rounded-xl">
             <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-white">Climate Data Analysis</h2>
             <DataVisualization selectedFile={selectedFile} />
           </div>

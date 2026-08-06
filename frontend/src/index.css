@@ -11,6 +11,50 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 dark:bg-climate-dark dark:text-climate-text antialiased transition-colors duration-300;
+    @apply bg-gray-50 text-gray-900 dark:text-climate-text antialiased transition-colors duration-300;
   }
+}
+
+.ambient-glow-bg {
+  background: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.07) 0px, transparent 55%),
+              radial-gradient(at 100% 0%, rgba(249, 115, 22, 0.06) 0px, transparent 50%),
+              radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 55%),
+              #f8fafc;
+  transition: background 0.4s, background-color 0.4s;
+}
+.dark .ambient-glow-bg {
+  background: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 55%),
+              radial-gradient(at 100% 0%, rgba(249, 115, 22, 0.08) 0px, transparent 50%),
+              radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 55%),
+              var(--color-climate-dark);
+}
+
+.glass-panel {
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+}
+.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(51, 65, 85, 0.65);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom Scrollbar for a premium feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.7);
 }
