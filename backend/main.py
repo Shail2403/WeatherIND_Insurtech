@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+from datetime import datetime, timezone
 from services.s3_client import test_s3_connection, upload_json_to_s3, s3_client, BUCKET_NAME
 from services.weather_api import fetch_historical_weather
 from schemas.weather import WeatherRequest
@@ -59,7 +59,7 @@ async def store_weather_data(request: WeatherRequest):
 
 @weatherApp.get("/list-weather-files")
 def list_weather_files():
-    """Returns a list of all JSON files stored in the bucket."""
+    """Returns a list of all JSON files stored in the bucket and deletes files older than 30 days."""
     try:
         response = s3_client.list_objects_v2(Bucket=BUCKET_NAME)
         files = []

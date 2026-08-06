@@ -141,6 +141,15 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
     requestGeolocation();
   }, []);
 
+  // Today's date for limiting future dates
+  const d = new Date();
+  const today = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
+  useEffect(() => {
+    // Clear validation errors when user changes dates
+    if (error) setError(null);
+  }, [formData.start_date, formData.end_date]);
+
   // Date Modifier State
   const [modifierAction, setModifierAction] = useState('add'); // 'add' or 'subtract'
   const [modifierTarget, setModifierTarget] = useState('start'); // 'start' or 'end'
@@ -213,7 +222,13 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.detail || 'Failed to fetch weather data');
+        let errStr = data.detail || 'Failed to fetch weather data';
+        if (Array.isArray(data.detail)) {
+          errStr = data.detail.map(e => e.msg).join(', ');
+        } else if (typeof data.detail === 'object') {
+          errStr = JSON.stringify(data.detail);
+        }
+        throw new Error(errStr);
       }
 
       onUploadSuccess(data.file);
@@ -432,6 +447,7 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
               name="start_date"
               value={formData.start_date}
               onChange={handleChange}
+              max={today}
               required
               className="w-full bg-gray-50 dark:bg-climate-dark border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-gray-900 dark:text-white focus:outline-none focus:border-climate-accent transition-colors shadow-sm"
             />
@@ -443,6 +459,7 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
               name="end_date"
               value={formData.end_date}
               onChange={handleChange}
+              max={today}
               required
               className="w-full bg-gray-50 dark:bg-climate-dark border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-gray-900 dark:text-white focus:outline-none focus:border-climate-accent transition-colors shadow-sm"
             />

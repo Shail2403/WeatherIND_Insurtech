@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileJson, Loader2, Database, Clock, Download, Search } from 'lucide-react';
+import { FileJson, Loader2, Database, Clock, Download, Search, Trash2 } from 'lucide-react';
 
 export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFetch }) {
   const [files, setFiles] = useState([]);
@@ -86,33 +86,47 @@ export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFet
     setFilteredFiles(activeFiles);
   }, [files, dateFilter, searchQuery, searchedCoordinates]);
 
-  useEffect(() => {
-    const fetchFiles = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('http://127.0.0.1:8000/list-weather-files');
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.detail || 'Failed to fetch files');
-        }
-        
-        // Sort files so the newest is at the top
-        const sortedFiles = (data.files || []).sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at)
-        );
-        
-        setFiles(sortedFiles);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const fetchFiles = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('http://127.0.0.1:8000/list-weather-files');
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Failed to fetch files');
       }
-    };
+      
+      // Sort files so the newest is at the top
+      const sortedFiles = (data.files || []).sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+      
+      setFiles(sortedFiles);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchFiles();
   }, [refreshTrigger]); // Re-run whenever refreshTrigger changes (e.g., after upload)
+
+  const handleClearAll = async () => {
+    if (window.confirm("⚠️ Are you sure you want to delete ALL stored files? This cannot be undone.")) {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/weather-files/clear', { method: 'DELETE' });
+        if (!response.ok) throw new Error('Failed to delete files');
+        fetchFiles();
+        if (onSelectFile) onSelectFile(null); // Clear active selection in parent component
+      } catch (err) {
+        console.error(err);
+        alert('Error deleting files');
+      }
+    }
+  };
 
   const handleSelect = (fileName) => {
     setActiveFile(fileName);
@@ -138,10 +152,25 @@ export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFet
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Database size={20} className="text-climate-accent" />
-        <h3 className="font-medium text-gray-800 dark:text-gray-200">Storage Bucket Contents</h3>
+      {/* Header & Clear All Button */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <Database size={20} className="text-climate-accent" />
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">S3 Storage</h2>
+        </div>
+        <button 
+          onClick={handleClearAll}
+          className="p-1.5 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-800"
+          title="Delete all files"
+        >
+          <Trash2 size={18} />
+        </button>
       </div>
+      
+      {/* Auto-Delete Warning Note */}
+      <p className="text-xs text-orange-600 dark:text-orange-400 font-medium mb-6 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 rounded-lg border border-orange-200 dark:border-orange-800/50">
+        <span className="font-bold">Note:</span> Files older than 30 days will be auto-deleted due to infrastructure limitations.
+      </p>
       
       {/* Filters and Search */}
       <div className="flex flex-col xl:flex-row gap-3 mb-4">
