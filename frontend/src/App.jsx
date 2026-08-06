@@ -35,6 +35,11 @@ function App() {
     }
   }, [isDarkMode]);
 
+  // Smooth scroll for mobile navigation
+  const scrollToSection = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <div className="min-h-screen ambient-glow-bg p-8 transition-colors duration-300 relative overflow-hidden">
       
@@ -74,16 +79,29 @@ function App() {
         >
           {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
-      </header>
+        </header>
 
-      {/* Main Dashboard Grid */}
-      <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left Column: Input Form */}
-        <div className="lg:col-span-4 space-y-8">
+        {/* Mobile Navigation Pills */}
+        <div className="lg:hidden flex flex-wrap justify-center gap-2 mb-8 animate-fade-in z-50 relative">
+          <button onClick={() => scrollToSection('section-fetch')} className="px-4 py-2 bg-white/90 dark:bg-climate-card/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-full text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm hover:text-climate-accent transition-colors">
+            📍 Fetch Data
+          </button>
+          <button onClick={() => scrollToSection('section-storage')} className="px-4 py-2 bg-white/90 dark:bg-climate-card/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-full text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm hover:text-climate-accent transition-colors">
+            🗄️ Storage
+          </button>
+          <button onClick={() => scrollToSection('section-analysis')} className="px-4 py-2 bg-white/90 dark:bg-climate-card/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-full text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm hover:text-climate-accent transition-colors">
+            📊 Analysis
+          </button>
+        </div>
+
+        {/* Main Dashboard Grid */}
+        <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* Input Form */}
-          <div className="glass-panel p-6 rounded-xl">
+          {/* Left Column: Input Form */}
+          <div className="lg:col-span-4 space-y-8">
+            
+            {/* Input Form */}
+            <div id="section-fetch" className="glass-panel p-6 rounded-xl scroll-mt-24">
             <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Fetch Data</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Enter coordinates and date range to fetch from Open-Meteo and store in S3.
@@ -99,19 +117,19 @@ function App() {
           </div>
         </div>
 
-        {/* Right Column: Visualization & File Browser */}
-        <div className="lg:col-span-8 space-y-8">
-          
-          {/* File Browser moved to top of right column */}
-          <div className="glass-panel p-6 rounded-xl">
-            <FileBrowser 
-              refreshTrigger={refreshTrigger} 
-              onSelectFile={(file) => setSelectedFile(file)} 
-              onRequestFetch={(lat, lon, name) => setExternalLocationTarget({ lat, lon, name })}
-            />
-          </div>
-          
-          <div className="glass-panel p-6 rounded-xl">
+          {/* Right Column: Visualization & File Browser */}
+          <div className="lg:col-span-8 space-y-8">
+            
+            {/* File Browser moved to top of right column */}
+            <div id="section-storage" className="glass-panel p-6 rounded-xl scroll-mt-24">
+              <FileBrowser 
+                refreshTrigger={refreshTrigger} 
+                onSelectFile={(file) => setSelectedFile(file)} 
+                onRequestFetch={(lat, lon, name) => setExternalLocationTarget({ lat, lon, name })}
+              />
+            </div>
+            
+            <div id="section-analysis" className="glass-panel p-6 rounded-xl scroll-mt-24">
             <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-white">Climate Data Analysis</h2>
             <DataVisualization selectedFile={selectedFile} />
           </div>

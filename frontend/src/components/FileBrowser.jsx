@@ -205,13 +205,13 @@ export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFet
               onClick={() => handleSelect(file.name)}
               className={`w-full text-left p-3 rounded-lg border transition-all duration-200 flex items-start gap-3
                 ${activeFile === file.name 
-                  ? 'bg-climate-dark border-climate-accent shadow-[0_0_10px_rgba(14,165,233,0.2)]' 
-                  : 'bg-climate-dark/50 border-gray-700 hover:border-gray-500 hover:bg-climate-dark'
+                  ? 'bg-blue-50 border-blue-400 shadow-md dark:bg-climate-dark dark:border-climate-accent dark:shadow-[0_0_10px_rgba(14,165,233,0.2)]' 
+                  : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 dark:bg-climate-dark/50 dark:border-gray-700 dark:hover:border-gray-500 dark:hover:bg-climate-dark'
                 }`}
             >
-              <FileJson size={20} className={activeFile === file.name ? "text-climate-accent mt-0.5" : "text-gray-500 mt-0.5"} />
+              <FileJson size={20} className={activeFile === file.name ? "text-blue-600 dark:text-climate-accent mt-0.5" : "text-gray-400 dark:text-gray-500 mt-0.5"} />
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium truncate ${activeFile === file.name ? 'text-white' : 'text-gray-300'}`}>
+                <p className={`text-sm font-bold truncate ${activeFile === file.name ? 'text-blue-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
                   {file.name}
                 </p>
                 <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
