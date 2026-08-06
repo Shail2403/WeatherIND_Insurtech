@@ -96,31 +96,42 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
     return () => clearTimeout(timeoutId);
   }, [formData.latitude, formData.longitude]);
 
-  const requestGeolocation = () => {
+  const requestGeolocation = async () => {
     if ("geolocation" in navigator) {
+      // Check permissions first if API is available
+      if (navigator.permissions) {
+        try {
+          const perm = await navigator.permissions.query({ name: 'geolocation' });
+          if (perm.state === 'denied') {
+            setGeoError(true);
+            setIsLocating(false);
+            return;
+          }
+        } catch (e) {
+          // fallback if permissions API fails
+        }
+      }
+
       setIsLocating(true);
       setGeoError(false);
       
-      // Artificial delay to provide visual feedback before the browser instantly rejects it
-      setTimeout(() => {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setFormData(prev => ({
-              ...prev,
-              latitude: position.coords.latitude.toFixed(4),
-              longitude: position.coords.longitude.toFixed(4)
-            }));
-            setGeoError(false);
-            setIsLocating(false);
-          },
-          (err) => {
-            console.warn("Geolocation denied or error:", err);
-            setGeoError(true);
-            setIsLocating(false);
-          },
-          { timeout: 5000 }
-        );
-      }, 500);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFormData(prev => ({
+            ...prev,
+            latitude: position.coords.latitude.toFixed(4),
+            longitude: position.coords.longitude.toFixed(4)
+          }));
+          setGeoError(false);
+          setIsLocating(false);
+        },
+        (err) => {
+          console.warn("Geolocation denied or error:", err);
+          setGeoError(true);
+          setIsLocating(false);
+        },
+        { timeout: 5000 }
+      );
     } else {
       setGeoError(true);
     }
@@ -143,7 +154,9 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
     if (modifierTarget === 'start' || modifierTarget === 'both') {
       if (newFormData.start_date) {
         const start = new Date(newFormData.start_date);
-        start.setDate(modifierAction === 'add' ? start.getDate() + amount : start.getDate() - amount);
+        // To ADD days to the range at the start, we move the start date BACKWARD
+        // To REMOVE days from the range at the start, we move the start date FORWARD
+        start.setDate(modifierAction === 'add' ? start.getDate() - amount : start.getDate() + amount);
         newFormData.start_date = start.toISOString().split('T')[0];
       }
     }
@@ -151,6 +164,8 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
     if (modifierTarget === 'end' || modifierTarget === 'both') {
       if (newFormData.end_date) {
         const end = new Date(newFormData.end_date);
+        // To ADD days to the range at the end, we move the end date FORWARD
+        // To REMOVE days from the range at the end, we move the end date BACKWARD
         end.setDate(modifierAction === 'add' ? end.getDate() + amount : end.getDate() - amount);
         newFormData.end_date = end.toISOString().split('T')[0];
       }

@@ -53,6 +53,7 @@ export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFet
     // Date Filter
     if (dateFilter !== 'all') {
       const cutoff = new Date();
+      if (dateFilter === '20mins') cutoff.setMinutes(cutoff.getMinutes() - 20);
       if (dateFilter === '1hour') cutoff.setHours(cutoff.getHours() - 1);
       if (dateFilter === '3hours') cutoff.setHours(cutoff.getHours() - 3);
       if (dateFilter === '24hours') cutoff.setHours(cutoff.getHours() - 24);
@@ -156,13 +157,14 @@ export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFet
           {isSearchingLocation && <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-climate-accent" />}
         </div>
         <div className="flex flex-wrap gap-2">
-          {['all', '1hour', '3hours', '24hours', '3days', '7days'].map(f => (
+          {['all', '20mins', '1hour', '3hours', '24hours', '3days', '7days'].map(f => (
             <button 
               key={f}
               onClick={() => setDateFilter(f)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors shadow-sm ${dateFilter === f ? 'bg-climate-accent text-white border-climate-accent' : 'bg-white dark:bg-climate-dark border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-400 hover:text-climate-accent dark:hover:text-climate-accent'}`}
             >
               {f === 'all' ? 'All Time' : 
+               f === '20mins' ? 'Last 20m' :
                f === '1hour' ? 'Last Hour' : 
                f === '3hours' ? 'Last 3h' : 
                f === '24hours' ? 'Last 24h' : 
