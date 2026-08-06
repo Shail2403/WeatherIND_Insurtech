@@ -59,28 +59,33 @@ function App() {
   const sections = ['section-fetch', 'section-storage', 'section-analysis'];
 
   const handleScrollUp = () => {
-    const scrollY = window.scrollY;
-    const target = [...sections].reverse().find(id => {
-      const el = document.getElementById(id);
-      return el && el.offsetTop < scrollY - 20;
-    });
+    // Extract unique Y positions to handle side-by-side desktop grid cleanly
+    const yPositions = Array.from(new Set(
+      sections.map(id => document.getElementById(id)?.offsetTop).filter(y => y != null)
+    )).sort((a, b) => a - b);
 
-    if (target) {
-      document.getElementById(target).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const scrollY = window.scrollY;
+    // Find the last Y position that is above current scrollY - header buffer
+    const prevY = [...yPositions].reverse().find(y => y < scrollY - 50);
+
+    if (prevY !== undefined) {
+      window.scrollTo({ top: prevY - 24, behavior: 'smooth' }); // -24 for top margin padding
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handleScrollDown = () => {
-    const scrollY = window.scrollY;
-    const target = sections.find(id => {
-      const el = document.getElementById(id);
-      return el && el.offsetTop > scrollY + 20;
-    });
+    const yPositions = Array.from(new Set(
+      sections.map(id => document.getElementById(id)?.offsetTop).filter(y => y != null)
+    )).sort((a, b) => a - b);
 
-    if (target) {
-      document.getElementById(target).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const scrollY = window.scrollY;
+    // Find the first Y position that is below current scrollY + header buffer
+    const nextY = yPositions.find(y => y > scrollY + 50);
+
+    if (nextY !== undefined) {
+      window.scrollTo({ top: nextY - 24, behavior: 'smooth' });
     } else {
       window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
     }
@@ -94,14 +99,14 @@ function App() {
         <button 
           onClick={handleScrollUp}
           disabled={!canScrollUp}
-          className={`pointer-events-auto p-3 rounded-full backdrop-blur-md border shadow-lg transition-all ${
+          className={`pointer-events-auto p-3 rounded-full border-2 transition-all active:translate-y-0 active:shadow-[0px_0px_0px_0px_#facc15] ${
             canScrollUp 
-              ? 'bg-white/80 dark:bg-climate-card/80 border-gray-300 dark:border-gray-600 text-climate-accent hover:scale-110 active:scale-95' 
-              : 'bg-gray-100/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 opacity-50 cursor-not-allowed'
+              ? 'bg-gray-900 dark:bg-black border-gray-700 text-yellow-400 shadow-[4px_4px_0px_0px_#facc15] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_#fef08a]' 
+              : 'bg-gray-800 border-gray-700 text-gray-500 opacity-50 cursor-not-allowed shadow-none'
           }`}
           title="Scroll Up"
         >
-          <ChevronUp size={24} />
+          <ChevronUp size={24} className="stroke-[3]" />
         </button>
       </div>
 
@@ -109,14 +114,14 @@ function App() {
         <button 
           onClick={handleScrollDown}
           disabled={!canScrollDown}
-          className={`pointer-events-auto p-3 rounded-full backdrop-blur-md border shadow-lg transition-all ${
+          className={`pointer-events-auto p-3 rounded-full border-2 transition-all active:translate-y-0 active:shadow-[0px_0px_0px_0px_#facc15] ${
             canScrollDown 
-              ? 'bg-white/80 dark:bg-climate-card/80 border-gray-300 dark:border-gray-600 text-climate-accent hover:scale-110 active:scale-95' 
-              : 'bg-gray-100/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 opacity-50 cursor-not-allowed'
+              ? 'bg-gray-900 dark:bg-black border-gray-700 text-yellow-400 shadow-[4px_4px_0px_0px_#facc15] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_#fef08a]' 
+              : 'bg-gray-800 border-gray-700 text-gray-500 opacity-50 cursor-not-allowed shadow-none'
           }`}
           title="Scroll Down"
         >
-          <ChevronDown size={24} />
+          <ChevronDown size={24} className="stroke-[3]" />
         </button>
       </div>
       
