@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Sun, Moon, Cloud } from 'lucide-react'
+import { Sun, Moon, Cloud, ChevronUp, ChevronDown } from 'lucide-react'
 import InputForm from './components/InputForm'
 import FileBrowser from './components/FileBrowser'
 import DataVisualization from './components/DataVisualization'
@@ -35,13 +35,90 @@ function App() {
     }
   }, [isDarkMode]);
 
-  // Smooth scroll for mobile navigation
-  const scrollToSection = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Smooth scroll logic for dynamic navigation
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const innerHeight = window.innerHeight;
+      const scrollHeight = document.documentElement.scrollHeight;
+
+      setCanScrollUp(scrollY > 5);
+      setCanScrollDown(Math.ceil(scrollY + innerHeight) < scrollHeight - 5);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    // Run once on mount and after a short delay to account for rendering
+    handleScroll();
+    setTimeout(handleScroll, 500);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [refreshTrigger, selectedFile]); // Re-evaluate when content size changes
+
+  const sections = ['section-fetch', 'section-storage', 'section-analysis'];
+
+  const handleScrollUp = () => {
+    const scrollY = window.scrollY;
+    const target = [...sections].reverse().find(id => {
+      const el = document.getElementById(id);
+      return el && el.offsetTop < scrollY - 20;
+    });
+
+    if (target) {
+      document.getElementById(target).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleScrollDown = () => {
+    const scrollY = window.scrollY;
+    const target = sections.find(id => {
+      const el = document.getElementById(id);
+      return el && el.offsetTop > scrollY + 20;
+    });
+
+    if (target) {
+      document.getElementById(target).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    }
   };
 
   return (
     <div className="min-h-screen ambient-glow-bg p-8 transition-colors duration-300 relative overflow-hidden">
+      
+      {/* Floating Scroll Navigation */}
+      <div className="fixed inset-y-0 left-2 md:left-6 flex items-center z-[100] pointer-events-none">
+        <button 
+          onClick={handleScrollUp}
+          disabled={!canScrollUp}
+          className={`pointer-events-auto p-3 rounded-full backdrop-blur-md border shadow-lg transition-all ${
+            canScrollUp 
+              ? 'bg-white/80 dark:bg-climate-card/80 border-gray-300 dark:border-gray-600 text-climate-accent hover:scale-110 active:scale-95' 
+              : 'bg-gray-100/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 opacity-50 cursor-not-allowed'
+          }`}
+          title="Scroll Up"
+        >
+          <ChevronUp size={24} />
+        </button>
+      </div>
+
+      <div className="fixed inset-y-0 right-2 md:right-6 flex items-center z-[100] pointer-events-none">
+        <button 
+          onClick={handleScrollDown}
+          disabled={!canScrollDown}
+          className={`pointer-events-auto p-3 rounded-full backdrop-blur-md border shadow-lg transition-all ${
+            canScrollDown 
+              ? 'bg-white/80 dark:bg-climate-card/80 border-gray-300 dark:border-gray-600 text-climate-accent hover:scale-110 active:scale-95' 
+              : 'bg-gray-100/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 opacity-50 cursor-not-allowed'
+          }`}
+          title="Scroll Down"
+        >
+          <ChevronDown size={24} />
+        </button>
+      </div>
       
       {/* Decorative Weather Background Elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-20 dark:opacity-[0.03]">
@@ -81,21 +158,8 @@ function App() {
         </button>
         </header>
 
-        {/* Mobile Navigation Pills */}
-        <div className="lg:hidden flex flex-wrap justify-center gap-2 mb-8 animate-fade-in z-50 relative">
-          <button onClick={() => scrollToSection('section-fetch')} className="px-4 py-2 bg-white/90 dark:bg-climate-card/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-full text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm hover:text-climate-accent transition-colors">
-            📍 Fetch Data
-          </button>
-          <button onClick={() => scrollToSection('section-storage')} className="px-4 py-2 bg-white/90 dark:bg-climate-card/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-full text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm hover:text-climate-accent transition-colors">
-            🗄️ Storage
-          </button>
-          <button onClick={() => scrollToSection('section-analysis')} className="px-4 py-2 bg-white/90 dark:bg-climate-card/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-full text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm hover:text-climate-accent transition-colors">
-            📊 Analysis
-          </button>
-        </div>
-
         {/* Main Dashboard Grid */}
-        <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 sm:px-8">
           
           {/* Left Column: Input Form */}
           <div className="lg:col-span-4 space-y-8">
