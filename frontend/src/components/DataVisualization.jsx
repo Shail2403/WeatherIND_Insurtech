@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { 
-  LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine 
+  LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend
 } from 'recharts';
 import { 
   Loader2, TrendingUp, Thermometer, AlertTriangle, LineChart as LineChartIcon, AreaChart as AreaChartIcon,
   MapPin, Calendar, CloudRain, Wind, ThermometerSun, Snowflake, CheckCircle2, Cloud,
-  Maximize2, Minimize2, Download
+  Maximize2, Minimize2, Download, Droplets, FileDown
 } from 'lucide-react';
 import { useRef } from 'react';
 import * as htmlToImage from 'html-to-image';
@@ -17,8 +17,26 @@ export default function DataVisualization({ selectedFile }) {
   const [chartType, setChartType] = useState('line'); // 'line' or 'area'
   const [isMaximized, setIsMaximized] = useState(false);
   const chartRef = useRef(null);
+  
+  const [visibleSeries, setVisibleSeries] = useState('all'); // 'all', 'highs', 'lows'
+  const [showRainfall, setShowRainfall] = useState(false);
 
   const [headerLocation, setHeaderLocation] = useState('Locating...');
+
+  const exportToCSV = () => {
+    if (!data || data.length === 0) return;
+    const headers = ['Date', 'Max Temp (°C)', 'Min Temp (°C)', 'Precipitation (mm)', 'Wind Speed (km/h)'];
+    const csvRows = data.map(row => {
+      const dateStr = row.dateObj.toISOString().split('T')[0];
+      return [dateStr, row.temperature, row.minTemp, row.precipitation, row.windSpeed].join(',');
+    });
+    const csvContent = [headers.join(','), ...csvRows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `weather_data_${headerLocation.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.csv`;
+    link.click();
+  };
 
   const handleDownload = async () => {
     if (!chartRef.current) return;
@@ -293,28 +311,76 @@ export default function DataVisualization({ selectedFile }) {
             </button>
           </div>
 
-          <div className="flex items-center justify-between mb-4 px-2 pr-24">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3 px-2 pr-24">
             <div className="flex items-center gap-2">
               <Thermometer size={20} className="text-climate-accent" />
-              <h3 className="font-bold text-gray-800 dark:text-gray-200">{isMaximized ? `${headerLocation} - Temperature Time Series` : 'Temperature Time Series'}</h3>
+              <h3 className="font-bold text-gray-800 dark:text-gray-200">{isMaximized ? `${headerLocation} - Temperature Time Series` : 'Temperature & Rain'}</h3>
             </div>
             
-            {/* Chart Toggle */}
-            <div className="flex bg-gray-200 dark:bg-climate-dark border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
+            {/* Premium Chart Controls */}
+            <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap z-10">
+              {/* Series Filter */}
+              <div className="flex items-center rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100/50 dark:bg-gray-800/50 p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setVisibleSeries('all')}
+                  className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all min-h-[24px] flex items-center ${visibleSeries === 'all' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVisibleSeries('highs')}
+                  className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all min-h-[24px] flex items-center ${visibleSeries === 'highs' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
+                >
+                  Highs
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVisibleSeries('lows')}
+                  className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all min-h-[24px] flex items-center ${visibleSeries === 'lows' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}`}
+                >
+                  Lows
+                </button>
+              </div>
+
+              {/* Rain Toggle */}
               <button
-                onClick={() => setChartType('line')}
-                className={`p-1.5 transition-colors ${chartType === 'line' ? 'bg-climate-accent text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
-                title="Line Chart"
+                type="button"
+                onClick={() => setShowRainfall(!showRainfall)}
+                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium border transition-all min-h-[24px] ${showRainfall ? 'bg-blue-100 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300' : 'bg-white dark:bg-climate-dark text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
               >
-                <LineChartIcon size={16} />
+                <Droplets size={12} /> Rain
               </button>
+
+              {/* CSV Export */}
               <button
-                onClick={() => setChartType('area')}
-                className={`p-1.5 transition-colors ${chartType === 'area' ? 'bg-climate-accent text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
-                title="Area Chart"
+                type="button"
+                onClick={exportToCSV}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium transition-all min-h-[24px] bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/60 border border-emerald-200 dark:border-emerald-800"
               >
-                <AreaChartIcon size={16} />
+                <FileDown size={12} /> CSV
               </button>
+
+              <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
+
+              {/* Chart Type Toggle */}
+              <div className="flex bg-gray-200 dark:bg-climate-dark border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setChartType('line')}
+                  className={`p-1.5 transition-colors ${chartType === 'line' ? 'bg-climate-accent text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
+                  title="Line Chart"
+                >
+                  <LineChartIcon size={14} />
+                </button>
+                <button
+                  onClick={() => setChartType('area')}
+                  className={`p-1.5 transition-colors ${chartType === 'area' ? 'bg-climate-accent text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
+                  title="Area Chart"
+                >
+                  <AreaChartIcon size={14} />
+                </button>
+              </div>
             </div>
           </div>
           
@@ -324,7 +390,11 @@ export default function DataVisualization({ selectedFile }) {
               <LineChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" vertical={false} opacity={0.2} />
                 <XAxis dataKey="time" stroke="#6b7280" fontSize={12} tickMargin={10} minTickGap={30} />
-                <YAxis stroke="#6b7280" fontSize={12} domain={['auto', 'auto']} tickFormatter={(value) => `${value}°`} />
+                <YAxis yAxisId="left" stroke="#6b7280" fontSize={12} domain={['auto', 'auto']} tickFormatter={(value) => `${value}°`} />
+                {showRainfall && (
+                  <YAxis yAxisId="right" orientation="right" stroke="#0ea5e9" fontSize={12} tickFormatter={(value) => `${value}mm`} />
+                )}
+                <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', fontWeight: 'bold' }} />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: 'rgba(255, 255, 255, 0.95)', 
@@ -336,11 +406,19 @@ export default function DataVisualization({ selectedFile }) {
                   itemStyle={{ color: '#0ea5e9', fontWeight: 'bold' }}
                   labelStyle={{ color: '#4b5563', fontWeight: 'bold', marginBottom: '4px' }}
                 />
-                <ReferenceLine y={35} label={{ position: 'top', value: 'High Risk (>35°C)', fill: '#ef4444', fontSize: 12 }} stroke="#ef4444" strokeDasharray="3 3" />
-                <ReferenceLine y={0} label={{ position: 'bottom', value: 'Freeze Risk (<0°C)', fill: '#3b82f6', fontSize: 12 }} stroke="#3b82f6" strokeDasharray="3 3" />
+                <ReferenceLine yAxisId="left" y={35} label={{ position: 'top', value: 'High Risk (>35°C)', fill: '#ef4444', fontSize: 12 }} stroke="#ef4444" strokeDasharray="3 3" />
+                <ReferenceLine yAxisId="left" y={0} label={{ position: 'bottom', value: 'Freeze Risk (<0°C)', fill: '#3b82f6', fontSize: 12 }} stroke="#3b82f6" strokeDasharray="3 3" />
                 
-                <Line type="monotone" dataKey="temperature" stroke="#ef4444" strokeWidth={2} dot={{ r: 3, fill: '#ef4444' }} activeDot={{ r: 6 }} name="Max Temp" />
-                <Line type="monotone" dataKey="minTemp" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3, fill: '#3b82f6' }} activeDot={{ r: 6 }} name="Min Temp" />
+                {showRainfall && (
+                  <Bar yAxisId="right" dataKey="precipitation" fill="#0ea5e9" opacity={0.3} name="Rainfall (mm)" />
+                )}
+                
+                {(visibleSeries === 'all' || visibleSeries === 'highs') && (
+                  <Line yAxisId="left" type="monotone" dataKey="temperature" stroke="#ef4444" strokeWidth={2} dot={{ r: 3, fill: '#ef4444' }} activeDot={{ r: 6 }} name="Max Temp" />
+                )}
+                {(visibleSeries === 'all' || visibleSeries === 'lows') && (
+                  <Line yAxisId="left" type="monotone" dataKey="minTemp" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3, fill: '#3b82f6' }} activeDot={{ r: 6 }} name="Min Temp" />
+                )}
               </LineChart>
             ) : (
               <AreaChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
@@ -356,7 +434,11 @@ export default function DataVisualization({ selectedFile }) {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" vertical={false} opacity={0.2} />
                 <XAxis dataKey="time" stroke="#6b7280" fontSize={12} tickMargin={10} minTickGap={30} />
-                <YAxis stroke="#6b7280" fontSize={12} domain={['auto', 'auto']} tickFormatter={(value) => `${value}°`} />
+                <YAxis yAxisId="left" stroke="#6b7280" fontSize={12} domain={['auto', 'auto']} tickFormatter={(value) => `${value}°`} />
+                {showRainfall && (
+                  <YAxis yAxisId="right" orientation="right" stroke="#0ea5e9" fontSize={12} tickFormatter={(value) => `${value}mm`} />
+                )}
+                <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', fontWeight: 'bold' }} />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: 'rgba(255, 255, 255, 0.95)', 
@@ -368,11 +450,19 @@ export default function DataVisualization({ selectedFile }) {
                   itemStyle={{ color: '#0ea5e9', fontWeight: 'bold' }}
                   labelStyle={{ color: '#4b5563', fontWeight: 'bold', marginBottom: '4px' }}
                 />
-                <ReferenceLine y={35} stroke="#ef4444" strokeDasharray="3 3" />
-                <ReferenceLine y={0} stroke="#3b82f6" strokeDasharray="3 3" />
+                <ReferenceLine yAxisId="left" y={35} stroke="#ef4444" strokeDasharray="3 3" />
+                <ReferenceLine yAxisId="left" y={0} stroke="#3b82f6" strokeDasharray="3 3" />
                 
-                <Area type="monotone" dataKey="temperature" stroke="#ef4444" fillOpacity={1} fill="url(#colorMax)" name="Max Temp" />
-                <Area type="monotone" dataKey="minTemp" stroke="#3b82f6" fillOpacity={1} fill="url(#colorMin)" name="Min Temp" />
+                {showRainfall && (
+                  <Bar yAxisId="right" dataKey="precipitation" fill="#0ea5e9" opacity={0.3} name="Rainfall (mm)" />
+                )}
+
+                {(visibleSeries === 'all' || visibleSeries === 'highs') && (
+                  <Area yAxisId="left" type="monotone" dataKey="temperature" stroke="#ef4444" fillOpacity={1} fill="url(#colorMax)" name="Max Temp" />
+                )}
+                {(visibleSeries === 'all' || visibleSeries === 'lows') && (
+                  <Area yAxisId="left" type="monotone" dataKey="minTemp" stroke="#3b82f6" fillOpacity={1} fill="url(#colorMin)" name="Min Temp" />
+                )}
               </AreaChart>
             )}
           </ResponsiveContainer>

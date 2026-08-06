@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, CircleMarker, Tooltip, useMapEvents, useMap } from 'react-leaflet';
-import { Maximize2, Minimize2, Download } from 'lucide-react';
+import { Maximize2, Minimize2, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import * as htmlToImage from 'html-to-image';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -54,6 +54,7 @@ const InteractiveMap = ({ lat, lon, onLocationSelect, locationHistory = [], trac
   const defaultCenter = [51.505, -0.09]; // Default to London
   const center = lat && lon ? [lat, lon] : defaultCenter;
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isLegendOpen, setIsLegendOpen] = useState(false);
   const mapContainerRef = useRef(null);
 
   const handleDownload = async () => {
@@ -162,15 +163,30 @@ const InteractiveMap = ({ lat, lon, onLocationSelect, locationHistory = [], trac
           </Marker>
         )}
 
-        {/* Map Legend */}
-        <div className="absolute bottom-6 right-4 z-[1000] bg-white/90 dark:bg-gray-800/90 p-2.5 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500 border-2 border-white shadow-sm"></div>
-            <span className="text-gray-800 dark:text-gray-200">Current Target</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-orange-500 border-2 border-white shadow-sm"></div>
-            <span className="text-gray-800 dark:text-gray-200">History Location</span>
+        {/* Collapsible Map Legend (Vertical Center Right) */}
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 z-[1000] flex items-center">
+          {/* Tab Button */}
+          <button 
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setIsLegendOpen(!isLegendOpen); }}
+            className="bg-white/90 dark:bg-gray-800/90 p-1.5 rounded-l-lg shadow-[-4px_0_12px_rgba(0,0,0,0.1)] border-y border-l border-gray-200 dark:border-gray-700 backdrop-blur-md text-gray-700 dark:text-gray-300 hover:bg-white transition-all focus:outline-none"
+            title="Toggle Legend"
+          >
+            {isLegendOpen ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+          
+          {/* Legend Content */}
+          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isLegendOpen ? 'w-40 opacity-100' : 'w-0 opacity-0'}`}>
+            <div className="bg-white/90 dark:bg-gray-800/90 p-3 rounded-l-none shadow-lg border-y border-gray-200 dark:border-gray-700 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider w-40 whitespace-nowrap">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-3 h-3 rounded-full bg-blue-500 border-2 border-white shadow-sm shrink-0"></div>
+                <span className="text-gray-800 dark:text-gray-200 truncate">Current Target</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-orange-500 border-2 border-white shadow-sm shrink-0"></div>
+                <span className="text-gray-800 dark:text-gray-200 truncate">History Location</span>
+              </div>
+            </div>
           </div>
         </div>
 

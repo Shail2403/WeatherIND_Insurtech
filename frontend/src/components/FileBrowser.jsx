@@ -155,8 +155,8 @@ export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFet
       {/* Header & Clear All Button */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Database size={20} className="text-climate-accent" />
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">S3 Storage</h2>
+          <Database size={20} className="text-climate-accent shrink-0" />
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 break-words">S3 Compatible Bucket Storage</h2>
         </div>
         <button 
           onClick={handleClearAll}
@@ -168,8 +168,8 @@ export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFet
       </div>
       
       {/* Auto-Delete Warning Note */}
-      <p className="text-xs text-orange-600 dark:text-orange-400 font-medium mb-6 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 rounded-lg border border-orange-200 dark:border-orange-800/50">
-        <span className="font-bold">Note:</span> Files older than 30 days will be auto-deleted due to infrastructure limitations.
+      <p className="text-xs text-orange-600 dark:text-orange-400 font-medium mb-6 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 rounded-lg border border-orange-200 dark:border-orange-800/50 break-words text-wrap">
+        <span className="font-bold">Note:</span> Files older than 30 days will be auto-deleted due to infrastructure limitations. If you want to extend you must have to fetch again once for each 30 days.
       </p>
       
       {/* Filters and Search */}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CloudRain, MapPin, Calendar, Loader2, Plus, Minus, Settings2, AlertCircle } from 'lucide-react';
+import { CloudRain, MapPin, Calendar, Loader2, Plus, Minus, Settings2, AlertCircle, Lock } from 'lucide-react';
 import InteractiveMap from './InteractiveMap';
 
 export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
@@ -252,8 +252,8 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
       {geoError && !isLocating && (
         <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-300 p-3 rounded-lg text-sm flex flex-col items-start gap-2 animate-fade-in mb-4">
           <div className="flex items-start gap-2">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-            <p>
+            <Lock className="w-5 h-5 shrink-0 mt-0.5 text-orange-500" />
+            <p className="break-words">
               <strong>Location access denied.</strong> Your browser blocked location access. Click the "Lock" icon in your URL bar to allow it, or click the map manually.
             </p>
           </div>
