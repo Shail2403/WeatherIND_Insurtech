@@ -16,6 +16,25 @@ export default function InputForm({ onUploadSuccess }) {
   const [locationName, setLocationName] = useState('Locating...');
   const [isGeocoding, setIsGeocoding] = useState(false);
 
+  // History State
+  const [trackHistory, setTrackHistory] = useState(() => {
+    const saved = localStorage.getItem('trackHistory');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  
+  const [locationHistory, setLocationHistory] = useState(() => {
+    const saved = localStorage.getItem('locationHistory');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('trackHistory', JSON.stringify(trackHistory));
+  }, [trackHistory]);
+
+  useEffect(() => {
+    localStorage.setItem('locationHistory', JSON.stringify(locationHistory));
+  }, [locationHistory]);
+
   // Reverse Geocoding Effect with Debounce
   useEffect(() => {
     const lat = parseFloat(formData.latitude);
@@ -41,7 +60,16 @@ export default function InputForm({ onUploadSuccess }) {
           let cleanName = [area, state, country].filter(Boolean).join(', ');
           if (postcode) cleanName += ` - ${postcode}`;
           
-          setLocationName(cleanName || data.display_name);
+          const finalName = cleanName || data.display_name;
+          setLocationName(finalName);
+          
+          if (trackHistory) {
+            setLocationHistory(prev => {
+              const newEntry = { lat, lon, name: finalName };
+              const filtered = prev.filter(p => p.lat !== lat || p.lon !== lon);
+              return [newEntry, ...filtered].slice(0, 10);
+            });
+          }
         } else {
           setLocationName('Unknown Location');
         }
@@ -169,6 +197,9 @@ export default function InputForm({ onUploadSuccess }) {
         <InteractiveMap 
           lat={formData.latitude ? parseFloat(formData.latitude) : null}
           lon={formData.longitude ? parseFloat(formData.longitude) : null}
+          locationHistory={locationHistory}
+          trackHistory={trackHistory}
+          onToggleHistory={() => setTrackHistory(!trackHistory)}
           onLocationSelect={(lat, lon) => {
             setFormData(prev => ({
               ...prev,
