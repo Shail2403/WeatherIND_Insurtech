@@ -1,9 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-climate-dark: #0f172a;
+  --color-climate-card: #1e293b;
+  --color-climate-accent: #0ea5e9;
+  --color-climate-text: #f8fafc;
+}
 
 @layer base {
   body {
-    @apply bg-climate-dark text-climate-text antialiased;
+    @apply bg-gray-50 text-gray-900 dark:bg-climate-dark dark:text-climate-text antialiased transition-colors duration-300;
   }
 }

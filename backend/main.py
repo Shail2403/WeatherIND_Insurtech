@@ -6,14 +6,14 @@ from services.weather_api import fetch_historical_weather
 from schemas.weather import WeatherRequest
 import json
 
-app = FastAPI(
+weatherApp = FastAPI(
     title="Weather Explorer API",
     description="Backend for fetching weather data and storing it in Supabase S3",
     version="1.0.0"
 )
 
 # CORS configuration for frontend integration
-app.add_middleware(
+weatherApp.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # TODO: Restrict in production
     allow_credentials=True,
@@ -21,11 +21,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+@weatherApp.get("/")
 def root():
     return {"message": "Welcome to the Weather Explorer API"}
 
-@app.get("/health/s3")
+@weatherApp.get("/health/s3")
 def health_s3():
     """Health check endpoint to verify S3 connectivity."""
     is_connected = test_s3_connection()
@@ -33,7 +33,7 @@ def health_s3():
         return {"status": "ok", "message": "Successfully connected to Supabase S3 bucket"}
     return {"status": "error", "message": "Failed to connect to Supabase S3 bucket"}
 
-@app.post("/store-weather-data")
+@weatherApp.post("/store-weather-data")
 async def store_weather_data(request: WeatherRequest):
     """
     Fetches historical data from Open-Meteo and stores raw JSON in S3.
@@ -57,7 +57,7 @@ async def store_weather_data(request: WeatherRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server Error: {repr(e)}")
 
-@app.get("/list-weather-files")
+@weatherApp.get("/list-weather-files")
 def list_weather_files():
     """Returns a list of all JSON files stored in the bucket."""
     try:
@@ -76,7 +76,7 @@ def list_weather_files():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/weather-file-content/{file}")
+@weatherApp.get("/weather-file-content/{file}")
 def get_weather_file_content(file: str):
     """Retrieves specific weather JSON file from S3 bucket."""
     try:
