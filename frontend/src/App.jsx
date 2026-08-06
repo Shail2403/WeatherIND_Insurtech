@@ -7,6 +7,7 @@ import DataVisualization from './components/DataVisualization'
 function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [externalLocationTarget, setExternalLocationTarget] = useState(null);
   
   // Theme state: defaults to true (dark mode)
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -56,9 +57,11 @@ function App() {
               Enter coordinates and date range to fetch from Open-Meteo and store in S3.
             </p>
             <InputForm 
+              externalLocationTarget={externalLocationTarget}
               onUploadSuccess={(file) => {
                 setRefreshTrigger(prev => prev + 1);
                 setSelectedFile(file);
+                setExternalLocationTarget(null); // Reset after successful upload
               }} 
             />
           </div>
@@ -72,6 +75,7 @@ function App() {
             <FileBrowser 
               refreshTrigger={refreshTrigger} 
               onSelectFile={(file) => setSelectedFile(file)} 
+              onRequestFetch={(lat, lon, name) => setExternalLocationTarget({ lat, lon, name })}
             />
           </div>
           

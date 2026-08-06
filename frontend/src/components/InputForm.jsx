@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { CloudRain, MapPin, Calendar, Loader2, Plus, Minus, Settings2, AlertCircle } from 'lucide-react';
 import InteractiveMap from './InteractiveMap';
 
-export default function InputForm({ onUploadSuccess }) {
+export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
   const [formData, setFormData] = useState({
     latitude: '51.5074',
     longitude: '-0.1278',
@@ -15,6 +15,17 @@ export default function InputForm({ onUploadSuccess }) {
   const [geoError, setGeoError] = useState(false);
   const [locationName, setLocationName] = useState('Locating...');
   const [isGeocoding, setIsGeocoding] = useState(false);
+
+  // Sync with external target from FileBrowser
+  useEffect(() => {
+    if (externalLocationTarget) {
+      setFormData(prev => ({
+        ...prev,
+        latitude: externalLocationTarget.lat.toFixed(4),
+        longitude: externalLocationTarget.lon.toFixed(4)
+      }));
+    }
+  }, [externalLocationTarget]);
 
   // History State
   const [trackHistory, setTrackHistory] = useState(() => {

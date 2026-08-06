@@ -1,11 +1,89 @@
 import { useState, useEffect } from 'react';
-import { FileJson, Loader2, Database, Clock, Download } from 'lucide-react';
+import { FileJson, Loader2, Database, Clock, Download, Search } from 'lucide-react';
 
-export default function FileBrowser({ refreshTrigger, onSelectFile }) {
+export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFetch }) {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeFile, setActiveFile] = useState(null);
+
+  // Search and Filter State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState('all'); // 'all', '3days', '7days'
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+  const [filteredFiles, setFilteredFiles] = useState([]);
+  const [searchedCoordinates, setSearchedCoordinates] = useState(null); // {lat, lon, name}
+
+  // Forward Geocode Search Query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchedCoordinates(null);
+      return;
+    }
+
+    setIsSearchingLocation(true);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`);
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          setSearchedCoordinates({
+            lat: parseFloat(data[0].lat),
+            lon: parseFloat(data[0].lon),
+            name: data[0].display_name
+          });
+        } else {
+          setSearchedCoordinates({ lat: 999, lon: 999, name: 'Unknown' }); // Force no match
+        }
+      } catch (err) {
+        console.error("Search Geocoding error:", err);
+      } finally {
+        setIsSearchingLocation(false);
+      }
+    }, 800);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // Filter Logic
+  useEffect(() => {
+    let activeFiles = [...files];
+
+    // Date Filter
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      const cutoff = new Date();
+      if (dateFilter === '3days') cutoff.setDate(now.getDate() - 3);
+      if (dateFilter === '7days') cutoff.setDate(now.getDate() - 7);
+      
+      activeFiles = activeFiles.filter(file => new Date(file.created_at) >= cutoff);
+    }
+
+    // Location Filter
+    if (searchQuery.trim().length > 0) {
+      if (searchedCoordinates) {
+        const searchLat = searchedCoordinates.lat;
+        const searchLon = searchedCoordinates.lon;
+        
+        activeFiles = activeFiles.filter(file => {
+          const parts = file.name.split('_');
+          if (parts.length >= 3) {
+            const fileLat = parseFloat(parts[1]);
+            const fileLon = parseFloat(parts[2]);
+            // 0.05 degrees is roughly 5km tolerance
+            return Math.abs(fileLat - searchLat) < 0.05 && Math.abs(fileLon - searchLon) < 0.05;
+          }
+          return false;
+        });
+      } else {
+        // Fallback to exact text match while geocoding
+        activeFiles = activeFiles.filter(file => file.name.includes(searchQuery));
+      }
+    }
+
+    setFilteredFiles(activeFiles);
+  }, [files, dateFilter, searchQuery, searchedCoordinates]);
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -61,14 +139,61 @@ export default function FileBrowser({ refreshTrigger, onSelectFile }) {
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
         <Database size={20} className="text-climate-accent" />
-        <h3 className="font-medium text-gray-200">Storage Bucket Contents</h3>
+        <h3 className="font-medium text-gray-800 dark:text-gray-200">Storage Bucket Contents</h3>
       </div>
       
-      {files.length === 0 ? (
-        <p className="text-sm text-gray-500 text-center py-4">No weather data files found. Fetch some data first!</p>
+      {/* Filters and Search */}
+      <div className="flex flex-col xl:flex-row gap-3 mb-4">
+        <div className="flex-1 relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input 
+            type="text" 
+            placeholder="Search location (e.g. London)..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white dark:bg-climate-dark border border-gray-300 dark:border-gray-700 rounded-lg pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-gray-200 focus:border-climate-accent focus:outline-none transition-colors shadow-sm"
+          />
+          {isSearchingLocation && <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-climate-accent" />}
+        </div>
+        <div className="flex gap-2">
+          {['all', '3days', '7days'].map(f => (
+            <button 
+              key={f}
+              onClick={() => setDateFilter(f)}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors shadow-sm ${dateFilter === f ? 'bg-climate-accent text-white border-climate-accent' : 'bg-white dark:bg-climate-dark border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-400 hover:text-climate-accent dark:hover:text-climate-accent'}`}
+            >
+              {f === 'all' ? 'All Time' : f === '3days' ? 'Last 3 Days' : 'Last 7 Days'}
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      {filteredFiles.length === 0 ? (
+        searchQuery && !isSearchingLocation ? (
+          <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-500/30 p-4 rounded-lg text-center animate-fade-in shadow-inner">
+            <h4 className="text-orange-600 dark:text-orange-400 font-bold mb-2">Location Not Found in S3</h4>
+            <p className="text-sm text-orange-800 dark:text-gray-400 mb-4">
+              "{searchQuery}" is not in your object storage history. Do you want to fetch it now?
+            </p>
+            <button 
+              onClick={() => {
+                if (searchedCoordinates && searchedCoordinates.lat !== 999) {
+                  onRequestFetch(searchedCoordinates.lat, searchedCoordinates.lon, searchedCoordinates.name);
+                } else {
+                  alert("Could not determine exact coordinates for this location.");
+                }
+              }}
+              className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold py-2 px-6 rounded-lg transition-colors shadow-md"
+            >
+              Yes, Fetch It!
+            </button>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 text-center py-4">No weather data files found matching filters.</p>
+        )
       ) : (
         <div className="max-h-64 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-          {files.map((file) => (
+          {filteredFiles.map((file) => (
             <button
               key={file.name}
               onClick={() => handleSelect(file.name)}
