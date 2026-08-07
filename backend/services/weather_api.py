@@ -10,12 +10,13 @@ async def fetch_historical_weather(lat: float, lon: float, start_date: str, end_
     Fetches daily weather data from Open-Meteo.
     Dynamically routes to Forecast API for recent/future data or Archive API for historical data.
     """
-    end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
+    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
     today = datetime.utcnow().date()
-    days_ago = (today - end_date_obj).days
+    start_days_ago = (today - start_date_obj).days
 
-    # Open-Meteo's forecast API handles up to 92 days in the past and 16 days in the future.
-    if days_ago <= 90:
+    # Open-Meteo's forecast API handles up to 92 days in the past.
+    # We must route based on start_date, because if start_date > 92 days ago, forecast API throws a 400.
+    if start_days_ago <= 90:
         api_url = FORECAST_API_URL
     else:
         api_url = ARCHIVE_API_URL
@@ -32,5 +33,12 @@ async def fetch_historical_weather(lat: float, lon: float, start_date: str, end_
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.get(api_url, params=params)
+        
+        # Add user-friendly error handling for HTTP errors
+        if response.status_code == 400:
+            error_data = response.json()
+            reason = error_data.get("reason", "Unknown API Error")
+            raise Exception(f"Open-Meteo API Error: {reason}")
+            
         response.raise_for_status()
         return response.json()

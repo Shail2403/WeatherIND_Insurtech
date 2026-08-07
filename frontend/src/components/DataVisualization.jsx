@@ -5,7 +5,7 @@ import {
 import { 
   Loader2, TrendingUp, Thermometer, AlertTriangle, LineChart as LineChartIcon, AreaChart as AreaChartIcon,
   MapPin, Calendar, CloudRain, Wind, ThermometerSun, Snowflake, CheckCircle2, Cloud,
-  Maximize2, Minimize2, Download, Droplets, FileDown
+  Maximize2, Minimize2, Download, Droplets, FileDown, ChevronLeft, ChevronRight, TableProperties
 } from 'lucide-react';
 import { useRef } from 'react';
 import * as htmlToImage from 'html-to-image';
@@ -22,6 +22,10 @@ export default function DataVisualization({ selectedFile }) {
   const [showRainfall, setShowRainfall] = useState(false);
 
   const [headerLocation, setHeaderLocation] = useState('Locating...');
+
+  // Table Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const exportToCSV = () => {
     if (!data || data.length === 0) return;
@@ -99,6 +103,8 @@ export default function DataVisualization({ selectedFile }) {
               dateObj: date,
               temperature: result.daily.temperature_2m_max[index],
               minTemp: result.daily.temperature_2m_min[index],
+              apparentMax: result.daily.apparent_temperature_max ? result.daily.apparent_temperature_max[index] : null,
+              apparentMin: result.daily.apparent_temperature_min ? result.daily.apparent_temperature_min[index] : null,
               precipitation: result.daily.precipitation_sum ? result.daily.precipitation_sum[index] : 0,
               windSpeed: result.daily.wind_speed_10m_max ? result.daily.wind_speed_10m_max[index] : 0,
               timestamp: date.getTime()
@@ -170,6 +176,12 @@ export default function DataVisualization({ selectedFile }) {
   const maxWind = winds.length > 0 ? Math.max(...winds).toFixed(1) : 'N/A';
   const avgWind = winds.length > 0 ? (winds.reduce((a, b) => a + b, 0) / winds.length).toFixed(1) : 'N/A';
   const observations = data.length;
+
+  // Pagination Logic
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
+  const totalPages = Math.ceil(data.length / rowsPerPage);
 
   return (
     <div className="space-y-6">
@@ -469,6 +481,93 @@ export default function DataVisualization({ selectedFile }) {
         </div>
         </div>
       </div>
+
+      {/* Paginated Data Table */}
+      {!isMaximized && (
+        <div className="glass-panel p-4 rounded-xl border border-gray-200 dark:border-gray-700/60 bg-white dark:bg-climate-dark shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <TableProperties size={20} className="text-climate-accent" />
+              <h3 className="font-bold text-gray-800 dark:text-gray-200">Historical Daily Records</h3>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <label className="text-sm text-gray-600 dark:text-gray-400 font-medium">Rows per page:</label>
+              <select 
+                value={rowsPerPage} 
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1); // Reset to first page
+                }}
+                className="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 text-sm rounded-lg focus:ring-climate-accent focus:border-climate-accent block p-1.5"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
+                <tr>
+                  <th scope="col" className="px-6 py-3 font-bold">Date</th>
+                  <th scope="col" className="px-6 py-3 font-bold text-red-600 dark:text-red-400">Max Temp</th>
+                  <th scope="col" className="px-6 py-3 font-bold text-blue-600 dark:text-blue-400">Min Temp</th>
+                  <th scope="col" className="px-6 py-3 font-bold text-orange-600 dark:text-orange-400">Apparent Max</th>
+                  <th scope="col" className="px-6 py-3 font-bold text-sky-600 dark:text-sky-400">Apparent Min</th>
+                  <th scope="col" className="px-6 py-3 font-bold text-cyan-600 dark:text-cyan-400">Rainfall</th>
+                  <th scope="col" className="px-6 py-3 font-bold text-gray-600 dark:text-gray-300">Wind Speed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentRows.map((row, idx) => (
+                  <tr key={idx} className="bg-white border-b dark:bg-climate-dark dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <td className="px-6 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                      {row.dateObj.toISOString().split('T')[0]}
+                    </td>
+                    <td className="px-6 py-3">{row.temperature !== null ? `${row.temperature}°C` : '-'}</td>
+                    <td className="px-6 py-3">{row.minTemp !== null ? `${row.minTemp}°C` : '-'}</td>
+                    <td className="px-6 py-3">{row.apparentMax !== null ? `${row.apparentMax}°C` : '-'}</td>
+                    <td className="px-6 py-3">{row.apparentMin !== null ? `${row.apparentMin}°C` : '-'}</td>
+                    <td className="px-6 py-3">{row.precipitation !== null ? `${row.precipitation} mm` : '-'}</td>
+                    <td className="px-6 py-3">{row.windSpeed !== null ? `${row.windSpeed} km/h` : '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Showing <span className="font-semibold text-gray-900 dark:text-white">{indexOfFirstRow + 1}</span> to <span className="font-semibold text-gray-900 dark:text-white">{Math.min(indexOfLastRow, observations)}</span> of <span className="font-semibold text-gray-900 dark:text-white">{observations}</span> entries
+              </span>
+              <div className="inline-flex mt-2 xs:mt-0 gap-2">
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white transition-colors"
+                >
+                  <ChevronLeft size={16} className="mr-1" />
+                  Prev
+                </button>
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white transition-colors"
+                >
+                  Next
+                  <ChevronRight size={16} className="ml-1" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
     </div>
   );
 }

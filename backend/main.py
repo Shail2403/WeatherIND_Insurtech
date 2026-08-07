@@ -55,7 +55,7 @@ async def store_weather_data(request: WeatherRequest):
         return {"status": "ok", "file": file_name}
     
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Server Error: {repr(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @weatherApp.get("/list-weather-files")
 def list_weather_files():
