@@ -133,7 +133,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen ambient-glow-bg p-8 transition-colors duration-300 relative overflow-hidden">
+    <div className="min-h-screen ambient-glow-bg py-4 md:py-8 transition-colors duration-300 relative overflow-hidden">
       
       {/* Floating Scroll Navigation */}
       <div className="fixed inset-y-0 left-2 md:left-6 flex flex-col items-center justify-center z-[100] pointer-events-none">
@@ -194,7 +194,7 @@ function App() {
 
       <div className="relative z-10">
         {/* Header Section */}
-        <header className="max-w-6xl mx-auto mb-8 border-b border-gray-300 dark:border-climate-card pb-4 flex justify-between items-end">
+        <header className="max-w-6xl mx-auto mb-6 md:mb-8 border-b border-gray-300 dark:border-climate-card pb-4 px-3 sm:px-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
           <h1 className="text-3xl font-bold text-climate-accent">
             InRisk Climate Dashboard
@@ -232,7 +232,7 @@ function App() {
         </header>
 
         {/* Main Dashboard Grid */}
-        <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 sm:px-8">
+        <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 px-2 sm:px-4 md:px-8">
           
           {/* Left Column: Input Form */}
           <div className="lg:col-span-4 space-y-8">

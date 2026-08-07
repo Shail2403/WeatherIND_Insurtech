@@ -188,7 +188,7 @@ export default function DataVisualization({ selectedFile }) {
     <div className="space-y-6">
       
       {/* Header Banner */}
-      <div className="glass-panel p-6 rounded-xl border-l-4 border-l-climate-accent bg-gradient-to-r from-blue-50/50 to-white dark:from-blue-900/20 dark:to-climate-card/50">
+      <div className="glass-panel p-4 sm:p-6 rounded-xl border-l-4 border-l-climate-accent bg-gradient-to-r from-blue-50/50 to-white dark:from-blue-900/20 dark:to-climate-card/50 overflow-hidden">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
@@ -205,8 +205,8 @@ export default function DataVisualization({ selectedFile }) {
           </div>
           
           {/* Condition Box */}
-          <div className="bg-white dark:bg-climate-dark border border-gray-200 dark:border-gray-700 p-4 rounded-lg shadow-sm flex items-center gap-4 min-w-[200px]">
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+          <div className="bg-white dark:bg-climate-dark border border-gray-200 dark:border-gray-700 p-3 sm:p-4 rounded-lg shadow-sm flex items-center justify-between sm:justify-start gap-4 w-full md:w-auto">
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full shrink-0">
               {totalRain > 5 ? <CloudRain className="text-blue-500" size={24} /> : <Cloud className="text-blue-400" size={24} />}
             </div>
             <div>
@@ -219,35 +219,35 @@ export default function DataVisualization({ selectedFile }) {
       </div>
 
       {/* Advanced Metrics Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
         {/* Card 1 */}
-        <div className="glass-panel p-5 rounded-xl border border-gray-200 dark:border-gray-700/60 bg-gradient-to-br from-white to-red-50/50 dark:from-climate-dark dark:to-red-900/10">
+        <div className="glass-panel p-3 sm:p-5 rounded-xl border border-gray-200 dark:border-gray-700/60 bg-gradient-to-br from-white to-red-50/50 dark:from-climate-dark dark:to-red-900/10 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
-            <ThermometerSun size={16} className="text-red-500" />
-            <p className="text-gray-600 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Average High</p>
+            <ThermometerSun size={16} className="text-red-500 shrink-0" />
+            <p className="text-gray-600 dark:text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate">Average High</p>
           </div>
-          <p className="text-3xl font-black text-gray-900 dark:text-white mb-1">{avgHigh} <span className="text-lg text-gray-500 font-medium">°C</span></p>
-          <p className="text-xs text-red-600 dark:text-red-400 font-semibold bg-red-100 dark:bg-red-900/30 inline-block px-2 py-0.5 rounded-full">
+          <p className="text-xl sm:text-3xl font-black text-gray-900 dark:text-white mb-1">{avgHigh} <span className="text-sm sm:text-lg text-gray-500 font-medium">°C</span></p>
+          <p className="text-[10px] sm:text-xs text-red-600 dark:text-red-400 font-semibold bg-red-100 dark:bg-red-900/30 inline-block px-2 py-0.5 rounded-full truncate max-w-full">
             Peak: {peakHigh}°C
           </p>
         </div>
 
         {/* Card 2 */}
-        <div className="glass-panel p-5 rounded-xl border border-gray-200 dark:border-gray-700/60 bg-gradient-to-br from-white to-blue-50/50 dark:from-climate-dark dark:to-blue-900/10">
+        <div className="glass-panel p-3 sm:p-5 rounded-xl border border-gray-200 dark:border-gray-700/60 bg-gradient-to-br from-white to-blue-50/50 dark:from-climate-dark dark:to-blue-900/10 overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
-            <Snowflake size={16} className="text-blue-500" />
-            <p className="text-gray-600 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Average Low</p>
+            <Snowflake size={16} className="text-blue-500 shrink-0" />
+            <p className="text-gray-600 dark:text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate">Average Low</p>
           </div>
-          <p className="text-3xl font-black text-gray-900 dark:text-white mb-1">{avgLow} <span className="text-lg text-gray-500 font-medium">°C</span></p>
-          <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold bg-blue-100 dark:bg-blue-900/30 inline-block px-2 py-0.5 rounded-full">
+          <p className="text-xl sm:text-3xl font-black text-gray-900 dark:text-white mb-1">{avgLow} <span className="text-sm sm:text-lg text-gray-500 font-medium">°C</span></p>
+          <p className="text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 font-semibold bg-blue-100 dark:bg-blue-900/30 inline-block px-2 py-0.5 rounded-full truncate max-w-full">
             Lowest: {lowestLow}°C
           </p>
         </div>
 
         {/* Card 3 */}
-        <div className="glass-panel p-5 rounded-xl border border-gray-200 dark:border-gray-700/60 bg-gradient-to-br from-white to-cyan-50/50 dark:from-climate-dark dark:to-cyan-900/10">
+        <div className="glass-panel p-3 sm:p-5 rounded-xl border border-gray-200 dark:border-gray-700/60 bg-gradient-to-br from-white to-cyan-50/50 dark:from-climate-dark dark:to-cyan-900/10 overflow-hidden col-span-2 md:col-span-1">
           <div className="flex items-center gap-2 mb-2">
-            <CloudRain size={16} className="text-cyan-500" />
+            <CloudRain size={16} className="text-cyan-500 shrink-0" />
             <p className="text-gray-600 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Total Rainfall</p>
           </div>
           <p className="text-3xl font-black text-gray-900 dark:text-white mb-1">{totalRain} <span className="text-lg text-gray-500 font-medium">mm</span></p>
@@ -542,11 +542,11 @@ export default function DataVisualization({ selectedFile }) {
           
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 text-center sm:text-left">
               <span className="text-sm text-gray-600 dark:text-gray-400">
                 Showing <span className="font-semibold text-gray-900 dark:text-white">{indexOfFirstRow + 1}</span> to <span className="font-semibold text-gray-900 dark:text-white">{Math.min(indexOfLastRow, observations)}</span> of <span className="font-semibold text-gray-900 dark:text-white">{observations}</span> entries
               </span>
-              <div className="inline-flex mt-2 xs:mt-0 gap-2">
+              <div className="inline-flex gap-2">
                 <button 
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
