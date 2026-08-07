@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useRef } from 'react';
 import * as htmlToImage from 'html-to-image';
+import { API_BASE_URL } from '../config';
 
 export default function DataVisualization({ selectedFile }) {
   const [data, setData] = useState(null);
@@ -88,7 +89,7 @@ export default function DataVisualization({ selectedFile }) {
       setError(null);
       
       try {
-        const response = await fetch(`http://127.0.0.1:8000/weather-file-content/${selectedFile}`);
+        const response = await fetch(`${API_BASE_URL}/weather-file-content/${selectedFile}`);
         const result = await response.json();
         
         if (!response.ok) {

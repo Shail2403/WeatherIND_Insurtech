@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { CloudRain, MapPin, Calendar, Loader2, Plus, Minus, Settings2, AlertCircle, Lock } from 'lucide-react';
 import InteractiveMap from './InteractiveMap';
+import { API_BASE_URL } from '../config';
 
 export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
   const [formData, setFormData] = useState({
@@ -208,7 +209,7 @@ export default function InputForm({ onUploadSuccess, externalLocationTarget }) {
     setError(null);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/store-weather-data', {
+      const response = await fetch(`${API_BASE_URL}/store-weather-data`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

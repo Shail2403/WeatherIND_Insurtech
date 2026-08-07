@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FileJson, Loader2, Database, Clock, Download, Search, Trash2 } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFetch }) {
   const [files, setFiles] = useState([]);
@@ -90,7 +91,7 @@ export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFet
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://127.0.0.1:8000/list-weather-files');
+      const response = await fetch(`${API_BASE_URL}/list-weather-files`);
       const data = await response.json();
       
       if (!response.ok) {
@@ -117,7 +118,7 @@ export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFet
   const handleClearAll = async () => {
     if (window.confirm("⚠️ Are you sure you want to delete ALL stored files? This cannot be undone.")) {
       try {
-        const response = await fetch('http://127.0.0.1:8000/weather-files/clear', { method: 'DELETE' });
+        const response = await fetch(`${API_BASE_URL}/weather-files/clear`, { method: 'DELETE' });
         if (!response.ok) throw new Error('Failed to delete files');
         fetchFiles();
         if (onSelectFile) onSelectFile(null); // Clear active selection in parent component
@@ -252,7 +253,7 @@ export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFet
                 </div>
               </div>
               <a 
-                href={`http://127.0.0.1:8000/weather-file-content/${file.name}`}
+                href={`${API_BASE_URL}/weather-file-content/${file.name}`}
                 download={`${file.name}`}
                 target="_blank"
                 rel="noreferrer"
