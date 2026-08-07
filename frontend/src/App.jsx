@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Sun, Moon, Cloud, ChevronUp, ChevronDown } from 'lucide-react'
+import { Sun, Moon, Cloud, ChevronUp, ChevronDown, ArrowRight } from 'lucide-react'
 import InputForm from './components/InputForm'
 import FileBrowser from './components/FileBrowser'
 import DataVisualization from './components/DataVisualization'
@@ -34,6 +34,16 @@ function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // Theme Prompt Animation Logic
+  const [showThemePrompt, setShowThemePrompt] = useState(false);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowThemePrompt(true);
+      setTimeout(() => setShowThemePrompt(false), 8000); // Hide after 8 seconds
+    }, 40000); // Trigger every 40 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   // Smooth scroll logic for dynamic navigation
   const [prevSectionName, setPrevSectionName] = useState(null);
@@ -167,17 +177,17 @@ function App() {
       </div>
       
       {/* Decorative Weather Background Elements */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-20 dark:opacity-[0.03]">
-        <div className="absolute top-10 left-[10%] animate-sun text-yellow-500">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-20 dark:opacity-[0.18]">
+        <div className="absolute top-10 left-[10%] animate-sun text-yellow-500 dark:text-orange-500">
           <Sun size={120} />
         </div>
-        <div className="absolute top-24 -left-32 animate-drift-slow text-gray-400">
+        <div className="absolute top-24 -left-32 animate-drift-slow text-gray-400 dark:text-blue-400">
           <Cloud size={80} />
         </div>
-        <div className="absolute top-48 -left-32 animate-drift-fast text-gray-300" style={{ animationDelay: '12s' }}>
+        <div className="absolute top-48 -left-32 animate-drift-fast text-gray-300 dark:text-indigo-400/50" style={{ animationDelay: '12s' }}>
           <Cloud size={60} />
         </div>
-        <div className="absolute bottom-32 -left-32 animate-drift-slow text-gray-400" style={{ animationDelay: '25s' }}>
+        <div className="absolute bottom-32 -left-32 animate-drift-slow text-gray-400 dark:text-purple-400/30" style={{ animationDelay: '25s' }}>
           <Cloud size={100} />
         </div>
       </div>
@@ -194,14 +204,31 @@ function App() {
           </p>
         </div>
         
-        {/* Theme Toggle Button */}
-        <button
-          onClick={() => setIsDarkMode(!isDarkMode)}
-          className="p-2 rounded-lg bg-gray-200 dark:bg-climate-card text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-          title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-        >
-          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
+        {/* Theme Toggle Button & Animated Prompt */}
+        <div className="relative flex items-center">
+          {showThemePrompt && (
+            <div className="absolute right-full mr-4 flex items-center gap-2 animate-fade-in whitespace-nowrap">
+              <span className="text-sm font-black bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent animate-pulse drop-shadow-md">
+                {isDarkMode ? "TRY LIGHT MODE!" : "TRY DARK MODE!"}
+              </span>
+              <ArrowRight size={20} className="text-orange-500 animate-bounce-horizontal" />
+            </div>
+          )}
+          <button
+            onClick={() => {
+              setIsDarkMode(!isDarkMode);
+              setShowThemePrompt(false);
+            }}
+            className={`p-3 rounded-full transition-all duration-300 ${
+              showThemePrompt 
+                ? 'bg-climate-accent text-white scale-110 shadow-[0_0_20px_rgba(14,165,233,0.6)] animate-pulse-glow ring-4 ring-climate-accent/30' 
+                : 'bg-white dark:bg-climate-card text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm border border-gray-200 dark:border-gray-700 hover:scale-105'
+            }`}
+            title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {isDarkMode ? <Sun size={28} className={showThemePrompt ? "animate-spin-slow" : ""} /> : <Moon size={28} className={showThemePrompt ? "animate-pulse" : ""} />}
+          </button>
+        </div>
         </header>
 
         {/* Main Dashboard Grid */}

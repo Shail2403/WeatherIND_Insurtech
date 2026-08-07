@@ -233,9 +233,9 @@ export default function FileBrowser({ refreshTrigger, onSelectFile, onRequestFet
             <button
               key={file.name}
               onClick={() => handleSelect(file.name)}
-              className={`w-full text-left p-3 rounded-lg border transition-all duration-200 flex items-start gap-3
+              className={`w-full text-left p-3 rounded-lg border transition-all duration-300 flex items-start gap-3
                 ${activeFile === file.name 
-                  ? 'bg-blue-50 border-blue-400 shadow-md dark:bg-climate-dark dark:border-climate-accent dark:shadow-[0_0_10px_rgba(14,165,233,0.2)]' 
+                  ? 'bg-gradient-to-r from-blue-50 to-white border-blue-400 dark:from-climate-accent/20 dark:to-climate-dark dark:border-climate-accent ring-2 ring-blue-300 dark:ring-climate-accent animate-pulse-glow z-10 scale-[1.01]' 
                   : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 dark:bg-climate-dark/50 dark:border-gray-700 dark:hover:border-gray-500 dark:hover:bg-climate-dark'
                 }`}
             >
